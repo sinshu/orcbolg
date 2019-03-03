@@ -213,8 +213,6 @@ namespace Orcbolg.Dsp
                         return;
                     }
 
-                    Interlocked.Add(ref processedSampleCount, buffer.IntervalLength);
-
                     var entry = buffer.StartWriting();
                     if (entry == null)
                     {
@@ -264,6 +262,8 @@ namespace Orcbolg.Dsp
                             }
                         }
                     }
+
+                    Interlocked.Add(ref processedSampleCount, buffer.IntervalLength);
 
                     entry.DspEndTime = stopwatch.Elapsed;
                     buffer.EndWriting();

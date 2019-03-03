@@ -152,13 +152,13 @@ namespace Orcbolg.Dsp
 
             private void Process(IDspCommand command)
             {
-                if (stopped)
-                {
-                    return;
-                }
-
                 try
                 {
+                    if (stopped)
+                    {
+                        return;
+                    }
+
                     dsp.Process(context, command);
                     var intervalCommand = command as IntervalCommand;
                     if (intervalCommand != null)
