@@ -51,9 +51,12 @@
     <Compile Include="DspBuffer.cs" />
     <Compile Include="DspBufferEntry.cs" />
     <Compile Include="DspException.cs" />
+    <Compile Include="DspHelper.cs" />
     <Compile Include="DspScheduler.cs" />
+    <Compile Include="DspState.cs" />
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FileDspDriver.cs" />
+    <Compile Include="FileDspDriver_old.cs" />
     <Compile Include="IDspCommand.cs" />
     <Compile Include="IDspContext.cs" />
     <Compile Include="IDspDriver.cs" />

@@ -10,8 +10,9 @@ using Orcbolg.Dsp;
 
 namespace Rockon
 {
-    public partial class Form1 : Form
+    internal partial class Form1 : Form
     {
+        IDspDriver driver;
         IDspContext context;
 
         public Form1()
@@ -26,8 +27,9 @@ namespace Rockon
             setting.InputChannels.Add(1);
             setting.OutputChannels.Add(0);
             setting.OutputChannels.Add(1);
-            //var driver = new AsioDspDriver(setting);
-            var driver = new FileDspDriver("test_dsp.wav", 4567);
+            //driver = new AsioDspDriver(setting);
+            //driver = new FileDspDriver("test_dsp.wav", 4567);
+            driver = new FileDspDriver("test_dsp.wav", 4567, "output.wav", 2);
             var rec = new RecordTest(driver);
             var test = new ExceptionTest();
             var bypass = new BypassDsp(driver);
@@ -36,7 +38,9 @@ namespace Rockon
             driver.AddDsp(test);
             driver.AddDsp(bypass);
             driver.AddDsp(monitor);
+
             context = driver.Run();
+            FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, context.Completion);
             try
             {
                 await context.Completion;
@@ -46,12 +50,22 @@ namespace Rockon
                 MessageBox.Show(ex.ToString());
             }
             rec.Dispose();
+            driver.Dispose();
             Console.WriteLine("STOPEED!");
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+        }
+
+        private void ClosingStart()
+        {
             context.Stop();
+        }
+
+        private void ClosingEnd()
+        {
+            driver.Dispose();
         }
     }
 }

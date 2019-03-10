@@ -16,10 +16,10 @@ namespace Orcbolg.Dsp
         private readonly DspThread[] threads;
         private readonly List<Exception> exceptions;
 
-        private bool stopped;
+        private DspState state;
 
-        private readonly Task realtimeDspCompletion;
-        private readonly Task nonrealtimeDspCompletion;
+        private Task realtimeDspCompletion;
+        private Task nonrealtimeDspCompletion;
 
         public DspScheduler(IDspContext context, DspBuffer buffer, IReadOnlyList<INonrealtimeDsp> dsps)
         {
@@ -30,7 +30,17 @@ namespace Orcbolg.Dsp
             threads = dsps.Select(dsp => new DspThread(context, dsp)).ToArray();
             exceptions = new List<Exception>();
 
-            stopped = false;
+            state = DspState.Initialized;
+        }
+
+        public void Start()
+        {
+            if (state != DspState.Initialized)
+            {
+                throw new InvalidOperationException("Start method must not be called more than once.");
+            }
+
+            state = DspState.Running;
 
             realtimeDspCompletion = Task.Run((Action)IntervalPolling);
             nonrealtimeDspCompletion = Run();
@@ -38,11 +48,12 @@ namespace Orcbolg.Dsp
 
         private void IntervalPolling()
         {
-            var previous = DateTime.MaxValue;
-            var threshold = TimeSpan.FromSeconds(3);
             try
             {
-                while (!stopped)
+                var previous = DateTime.MaxValue;
+                var threshold = TimeSpan.FromSeconds(3);
+
+                while (state == DspState.Running)
                 {
                     var entry = buffer.Read();
                     if (entry != null)
@@ -102,7 +113,7 @@ namespace Orcbolg.Dsp
             var stopCommand = command as StopCommand;
             if (stopCommand != null)
             {
-                stopped = true;
+                state = DspState.Stop;
                 if (stopCommand.Exception != null)
                 {
                     exceptions.Add(stopCommand.Exception);
@@ -110,7 +121,7 @@ namespace Orcbolg.Dsp
                 return;
             }
 
-            if (stopped)
+            if (state == DspState.Stop)
             {
                 return;
             }
@@ -142,7 +153,7 @@ namespace Orcbolg.Dsp
 
                 stopped = false;
 
-                actionBlock = new ActionBlock<IDspCommand>(command => Process(command));
+                actionBlock = new ActionBlock<IDspCommand>((Action<IDspCommand>)Process);
             }
 
             public void Post(IDspCommand command)

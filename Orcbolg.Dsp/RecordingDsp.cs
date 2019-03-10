@@ -9,12 +9,14 @@ namespace Orcbolg.Dsp
     {
         private IDspDriver driver;
         private WaveFileWriter writer;
+        private byte[] buffer;
 
         public RecordTest(IDspDriver driver)
         {
             this.driver = driver;
             var format = new WaveFormat(driver.SampleRate, driver.InputChannelCount);
             writer = new WaveFileWriter("test.wav", format);
+            buffer = new byte[format.BlockAlign * driver.IntervalLength];
         }
 
         public void Dispose()
@@ -31,13 +33,8 @@ namespace Orcbolg.Dsp
             var interval = command as IntervalCommand;
             if (interval != null)
             {
-                for (var t = 0; t < interval.Length; t++)
-                {
-                    for (var ch = 0; ch < interval.InputInterval.Length; ch++)
-                    {
-                        writer.WriteSample(interval.InputInterval[ch][t]);
-                    }
-                }
+                DspHelper.WriteInt16(interval.InputInterval, buffer, interval.Length);
+                writer.Write(buffer, 0, writer.WaveFormat.BlockAlign * interval.Length);
             }
         }
     }

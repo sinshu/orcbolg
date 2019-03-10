@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Orcbolg.Dsp
 {
-    internal class DspBufferEntry
+    internal sealed class DspBufferEntry
     {
         private readonly float[][] inputInterval;
         private readonly float[][] outputInterval;
@@ -63,25 +63,25 @@ namespace Orcbolg.Dsp
         public long Position
         {
             get => position;
-            set => position = value;
+            internal set => position = value;
         }
 
         public TimeSpan DspStartTime
         {
             get => dspStartTime;
-            set => dspStartTime = value;
+            internal set => dspStartTime = value;
         }
 
         public TimeSpan DspEndTime
         {
             get => dspEndTime;
-            set => dspEndTime = value;
+            internal set => dspEndTime = value;
         }
 
         public DateTime GlobalTime
         {
             get => globalTime;
-            set => globalTime = value;
+            internal set => globalTime = value;
         }
     }
 }

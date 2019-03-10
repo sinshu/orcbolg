@@ -35,6 +35,18 @@ namespace Orcbolg.Dsp
             readPosition = 0;
         }
 
+        public void Reset()
+        {
+            foreach (var entry in entries)
+            {
+                entry.SetReferenceCount(1);
+                entry.Release();
+            }
+
+            writePosition = 0;
+            readPosition = 0;
+        }
+
         public DspBufferEntry StartWriting()
         {
             var entry = entries[writePosition % entryCount];
