@@ -152,7 +152,6 @@ namespace Orcbolg.Dsp
 
             if (state == DspState.Initialized || state == DspState.Stop)
             {
-                state = DspState.Running;
                 return new AsioDspContext(this);
             }
             else
@@ -176,11 +175,6 @@ namespace Orcbolg.Dsp
             if (state == DspState.Disposed)
             {
                 return;
-            }
-
-            if (state == DspState.Running)
-            {
-                throw new InvalidCastException("Dispose method must be called when DSP is not running.");
             }
 
             if (naDriverExt != null)
@@ -245,6 +239,8 @@ namespace Orcbolg.Dsp
             {
                 try
                 {
+                    driver.state = DspState.Running;
+
                     driver.buffer.Reset();
                     stopwatch.Start();
 
@@ -254,15 +250,28 @@ namespace Orcbolg.Dsp
                     scheduler.Start();
                     await scheduler.RealtimeDspCompletion;
 
-                    driver.naDriverExt.Stop();
+                    // Since the driver might be disposed while awaiting, the null check is necessary.
+                    if (driver.naDriverExt != null)
+                    {
+                        driver.naDriverExt.Stop();
+                    }
 
                     await scheduler.NonrealtimeDspCompletion;
                 }
                 finally
                 {
-                    driver.naDriverExt.FillBufferCallback = null;
+                    if (driver.naDriverExt != null)
+                    {
+                        driver.naDriverExt.FillBufferCallback = null;
+                    }
+
                     stopwatch.Stop();
-                    driver.state = DspState.Stop;
+
+                    // If the driver is already disposed, the state should be kept as disposed.
+                    if (driver.state != DspState.Disposed)
+                    {
+                        driver.state = DspState.Stop;
+                    }
                 }
             }
 

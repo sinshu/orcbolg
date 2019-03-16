@@ -12,60 +12,57 @@ namespace Rockon
 {
     internal partial class Form1 : Form
     {
-        IDspDriver driver;
-        IDspContext context;
+        private bool running;
+        private AppSetting appSetting;
+        private DspComponent dspComponent;
 
         public Form1()
         {
             InitializeComponent();
+
+            running = false;
         }
 
         private async void Form1_Shown(object sender, EventArgs e)
         {
-            var setting = new AsioDspSetting("ASIO4ALL v2", 48000, 1 * 48000);
-            setting.InputChannels.Add(0);
-            setting.InputChannels.Add(1);
-            setting.OutputChannels.Add(0);
-            setting.OutputChannels.Add(1);
-            //driver = new AsioDspDriver(setting);
-            //driver = new FileDspDriver("test_dsp.wav", 4567);
-            driver = new FileDspDriver("test_dsp.wav", 4567, "output.wav", 2);
-            var rec = new RecordTest(driver);
-            var test = new ExceptionTest();
-            var bypass = new BypassDsp(driver);
-            var monitor = new WaveformMonitorDsp(driver, pictureBox1, 1024, true);
-            driver.AddDsp(rec);
-            driver.AddDsp(test);
-            driver.AddDsp(bypass);
-            driver.AddDsp(monitor);
+            if (running)
+            {
+                return;
+            }
 
-            context = driver.Run();
-            FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, context.Completion);
+            running = true;
+
             try
             {
-                await context.Completion;
+                appSetting = await Task.Run(() => new AppSetting());
+                dspComponent = new DspComponent(appSetting, pictureBox1);
+                FormHelper.SetFormResizeAction(this, MonitorResize);
+                FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
+                await dspComponent.DspContext.Completion;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
-            rec.Dispose();
-            driver.Dispose();
-            Console.WriteLine("STOPEED!");
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
+        }
+
+        private void MonitorResize()
+        {
+            dspComponent.Monitor.Resize();
         }
 
         private void ClosingStart()
         {
-            context.Stop();
+            dspComponent.DspContext.Stop();
         }
 
         private void ClosingEnd()
         {
-            driver.Dispose();
+            dspComponent.Dispose();
         }
     }
 }

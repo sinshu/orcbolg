@@ -56,7 +56,6 @@
     <Compile Include="DspState.cs" />
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FileDspDriver.cs" />
-    <Compile Include="FileDspDriver_old.cs" />
     <Compile Include="IDspCommand.cs" />
     <Compile Include="IDspContext.cs" />
     <Compile Include="IDspDriver.cs" />
@@ -68,7 +67,7 @@
     <Compile Include="RecordingDsp.cs" />
     <Compile Include="StopCommand.cs" />
     <Compile Include="WatchdogDsp.cs" />
-    <Compile Include="WaveformMonitorDsp.cs" />
+    <Compile Include="WaveformMonitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

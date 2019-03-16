@@ -8,6 +8,26 @@ namespace Rockon
 {
     internal static class FormHelper
     {
+        public static void SetFormResizeAction(Form form, Action action)
+        {
+            form.ResizeEnd += (sender, e) => action();
+
+            var previous = form.WindowState;
+            form.Resize += (sender, e) =>
+            {
+                if (form.WindowState == FormWindowState.Maximized)
+                {
+                    action();
+                }
+                else if (form.WindowState == FormWindowState.Normal && previous == FormWindowState.Maximized)
+                {
+                    action();
+                }
+
+                previous = form.WindowState;
+            };
+        }
+
         public static void SetAsyncFormClosingAction(Form form, Action closingStart, Action closingEnd, Task completion)
         {
             var closing = false;
@@ -39,8 +59,8 @@ namespace Rockon
                 {
                 }
 
+                closingEnd();
                 canClose = true;
-
                 form.Close();
             };
         }
