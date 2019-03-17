@@ -12,6 +12,7 @@ namespace Rockon
         private IDspDriver dspDriver;
         private BypassDsp bypass;
         private WaveformMonitor monitor;
+        private Recorder recorder;
         private IDspContext dspContext;
 
         public DspComponent(AppSetting appSetting, PictureBox pictureBox)
@@ -33,6 +34,8 @@ namespace Rockon
                 dspDriver.AddDsp(bypass);
                 monitor = new WaveformMonitor(dspDriver, pictureBox, 2048, true);
                 dspDriver.AddDsp(monitor);
+                recorder = new Recorder(dspDriver);
+                //DspDriver.AddDsp(recorder);
 
                 dspContext = dspDriver.Run();
             }
@@ -57,6 +60,11 @@ namespace Rockon
 
         public void Dispose()
         {
+            if (recorder != null)
+            {
+                recorder.Dispose();
+                recorder = null;
+            }
             if (monitor != null)
             {
                 monitor.Dispose();

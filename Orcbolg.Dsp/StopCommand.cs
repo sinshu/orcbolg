@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Orcbolg.Dsp
 {
-    public class StopCommand : IDspCommand
+    public sealed class StopCommand : IDspCommand
     {
         private readonly Exception exception;
 

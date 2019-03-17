@@ -9,7 +9,6 @@ namespace Orcbolg.Dsp
 {
     public sealed class WaveformMonitor : INonrealtimeDsp, IDisposable
     {
-        private readonly IDspDriver driver;
         private readonly PictureBox pictureBox;
         private readonly int drawInterval;
         private readonly bool drawOutput;
@@ -36,11 +35,16 @@ namespace Orcbolg.Dsp
         private int ui_x;
         private int ui_sampleCount;
 
+        private Brush recordingColor;
+        private bool recording;
+
+        private Font font;
+        private List<Tuple<string, Color>> messages;
+
         public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int drawInterval, bool drawOutput)
         {
             try
             {
-                this.driver = driver;
                 this.pictureBox = pictureBox;
                 this.drawInterval = drawInterval;
                 this.drawOutput = drawOutput;
@@ -58,7 +62,7 @@ namespace Orcbolg.Dsp
 
                 background = new SolidBrush(Color.FromArgb(33, 33, 33));
                 grid = new SolidBrush(Color.FromArgb(32, 250, 250, 250));
-                clip = new SolidBrush(Color.FromArgb(244, 67, 54));
+                clip = new SolidBrush(Color.FromArgb(240, 67, 54));
                 waveform1 = new Brush[channelCount];
                 waveform2 = new Brush[channelCount];
                 var i = 0;
@@ -77,6 +81,12 @@ namespace Orcbolg.Dsp
                         i++;
                     }
                 }
+
+                recordingColor = new SolidBrush(Color.FromArgb(64, 244, 67, 54));
+                recording = false;
+
+                font = new Font(FontFamily.GenericMonospace, 9);
+                messages = new List<Tuple<string, Color>>();
 
                 Reset();
 
@@ -140,6 +150,18 @@ namespace Orcbolg.Dsp
                 Process(context, intervalCommand);
             }
 
+            var recordingStartCommand = command as RecordingStartCommand;
+            if (recordingStartCommand != null)
+            {
+                Process(context, recordingStartCommand);
+            }
+
+            var recordingStopCommand = command as RecordingStopCommand;
+            if (recordingStopCommand != null)
+            {
+                Process(context, recordingStopCommand);
+            }
+
             var jumpinessWarningCommand = command as JumpinessWarningCommand;
             if (jumpinessWarningCommand != null)
             {
@@ -192,6 +214,18 @@ namespace Orcbolg.Dsp
                     ResetStats();
                 }
             }
+        }
+
+        private void Process(IDspContext context, RecordingStartCommand command)
+        {
+            recording = true;
+            messages.Add(Tuple.Create("REC" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 67, 54)));
+        }
+
+        private void Process(IDspContext context, RecordingStopCommand command)
+        {
+            recording = false;
+            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 67, 54)));
         }
 
         private void UpdateBuffer()
@@ -252,6 +286,26 @@ namespace Orcbolg.Dsp
             {
                 ui_g.FillRectangle(grid, ui_x, 0, 1, ui_buffer.Height);
                 ui_sampleCount -= sampleRate;
+            }
+
+            if (recording)
+            {
+                ui_g.FillRectangle(recordingColor, ui_x, 0, 1, ui_buffer.Height);
+            }
+
+            if (messages.Count > 0)
+            {
+                foreach (var tuple in messages)
+                {
+                    var size= ui_g.MeasureString(tuple.Item1, font);
+                    using (var brush = new SolidBrush(tuple.Item2))
+                    {
+                        ui_g.FillRectangle(brush, ui_x, 0, 1, ui_buffer.Height);
+                        ui_g.DrawString(tuple.Item1, font, brush, ui_x - size.Width, 2);
+                        ui_g.DrawString(tuple.Item1, font, brush, ui_x - size.Width + ui_buffer.Width, 2);
+                    }
+                }
+                messages.Clear();
             }
 
             ui_x++;
