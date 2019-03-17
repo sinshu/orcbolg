@@ -80,7 +80,7 @@ namespace Orcbolg.Dsp
 
                 background = new SolidBrush(Color.FromArgb(33, 33, 33));
                 grid = new SolidBrush(Color.FromArgb(32, 250, 250, 250));
-                clip = new SolidBrush(Color.FromArgb(240, 67, 54));
+                clip = new SolidBrush(Color.FromArgb(240, 244, 67, 54));
                 waveform1 = new Brush[channelCount];
                 waveform2 = new Brush[channelCount];
                 {
@@ -194,10 +194,16 @@ namespace Orcbolg.Dsp
                 Process(context, recordingStopCommand);
             }
 
+            var messageCommand = command as MessageCommand;
+            if (messageCommand != null)
+            {
+                Process(context, messageCommand);
+            }
+
             var jumpinessWarningCommand = command as JumpinessWarningCommand;
             if (jumpinessWarningCommand != null)
             {
-                Process(jumpinessWarningCommand);
+                Process(context, jumpinessWarningCommand);
             }
         }
 
@@ -251,13 +257,13 @@ namespace Orcbolg.Dsp
         private void Process(IDspContext context, RecordingStartCommand command)
         {
             recording = true;
-            messages.Add(Tuple.Create("REC" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 67, 54)));
+            messages.Add(Tuple.Create("REC" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
         private void Process(IDspContext context, RecordingStopCommand command)
         {
             recording = false;
-            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 67, 54)));
+            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
         private void UpdateBuffer()
@@ -348,7 +354,12 @@ namespace Orcbolg.Dsp
             pictureBox.Refresh();
         }
 
-        private void Process(JumpinessWarningCommand command)
+        private void Process(IDspContext context, MessageCommand command)
+        {
+            messages.Add(Tuple.Create(command.Value + Environment.NewLine, Color.FromArgb(240, 0, 188, 212)));
+        }
+
+        private void Process(IDspContext context, JumpinessWarningCommand command)
         {
 
         }

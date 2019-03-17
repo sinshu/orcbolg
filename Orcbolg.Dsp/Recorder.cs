@@ -15,9 +15,15 @@ namespace Orcbolg.Dsp
         private readonly WaveFormat format;
         private readonly byte[] buffer;
 
-        private string destinationPath;
-        private WaveFileWriter writer;
-        private int sampleCount;
+        private string dstWavPath;
+        private string recWavPath;
+        private WaveFileWriter wavWriter;
+        private string dstCsvPath;
+        private string recCsvPath;
+        private StreamWriter csvWriter;
+        private int bufferedSampleCount;
+        private int readSampleCount;
+        private long recordingStartPosition;
 
         public Recorder(IDspDriver driver)
         {
@@ -26,16 +32,25 @@ namespace Orcbolg.Dsp
             format = new WaveFormat(driver.SampleRate, driver.InputChannelCount);
             buffer = new byte[format.BlockAlign * bufferLength];
 
-            destinationPath = null;
-            writer = null;
-            sampleCount = 0;
+            dstWavPath = null;
+            recWavPath = null;
+            wavWriter = null;
+            dstCsvPath = null;
+            recCsvPath = null;
+            csvWriter = null;
+            bufferedSampleCount = 0;
+            readSampleCount = 0;
+            recordingStartPosition = -1;
         }
 
         public void Dispose()
         {
-            if (writer != null)
+            try
             {
                 EndWriting();
+            }
+            catch
+            {
             }
         }
 
@@ -58,14 +73,27 @@ namespace Orcbolg.Dsp
             {
                 Process(context, intervalCommand);
             }
+
+            var messageCommand = command as MessageCommand;
+            if (messageCommand != null)
+            {
+                Process(context, messageCommand);
+            }
         }
 
         private void Process(IDspContext context, RecordingStartCommand command)
         {
             EndWriting();
-            destinationPath = command.Path;
-            writer = new WaveFileWriter(AddSuffix(destinationPath, recordingSuffix), format);
-            sampleCount = 0;
+            dstWavPath = command.Path;
+            recWavPath = AddSuffix(dstWavPath, recordingSuffix);
+            wavWriter = new WaveFileWriter(recWavPath, format);
+            dstCsvPath = Path.ChangeExtension(command.Path, ".csv");
+            recCsvPath = AddSuffix(dstCsvPath, recordingSuffix);
+            csvWriter = new StreamWriter(recCsvPath);
+            csvWriter.WriteLine("Position,Message");
+            bufferedSampleCount = 0;
+            readSampleCount = 0;
+            recordingStartPosition = -1;
         }
 
         private void Process(IDspContext context, RecordingStopCommand command)
@@ -75,16 +103,21 @@ namespace Orcbolg.Dsp
 
         private void Process(IDspContext context, IntervalCommand command)
         {
-            unsafe
+            if (recordingStartPosition == -1)
             {
-                if (writer != null)
+                recordingStartPosition = command.Position;
+            }
+
+            if (wavWriter != null)
+            {
+                unsafe
                 {
                     fixed (byte* bp = buffer)
                     {
                         var sp = (short*)bp;
                         for (var t = 0; t < command.Length; t++)
                         {
-                            var offset = channelCount * sampleCount;
+                            var offset = channelCount * bufferedSampleCount;
                             for (var ch = 0; ch < channelCount; ch++)
                             {
                                 var value = (int)Math.Round(0x8000 * command.InputInterval[ch][t]);
@@ -98,27 +131,49 @@ namespace Orcbolg.Dsp
                                 }
                                 sp[offset + ch] = (short)value;
                             }
-                            sampleCount++;
-                            if (sampleCount == bufferLength)
+                            bufferedSampleCount++;
+                            if (bufferedSampleCount == bufferLength)
                             {
-                                writer.Write(buffer, 0, buffer.Length);
-                                sampleCount = 0;
+                                wavWriter.Write(buffer, 0, buffer.Length);
+                                bufferedSampleCount = 0;
                             }
                         }
                     }
                 }
             }
+
+            readSampleCount += command.Length;
+        }
+
+        private void Process(IDspContext context, MessageCommand command)
+        {
+            if (csvWriter != null)
+            {
+                csvWriter.WriteLine(readSampleCount + "," + command.Value);
+            }
         }
 
         private void EndWriting()
         {
-            if (writer != null)
+            if (wavWriter != null)
             {
-                var recordingPath = writer.Filename;
-                writer.Dispose();
-                writer = null;
-                File.Move(recordingPath, destinationPath);
+                wavWriter.Dispose();
+                wavWriter = null;
+                File.Move(recWavPath, dstWavPath);
+                dstWavPath = null;
+                recWavPath = null;
             }
+            if (csvWriter != null)
+            {
+                csvWriter.Dispose();
+                csvWriter = null;
+                File.Move(recCsvPath, dstCsvPath);
+                dstCsvPath = null;
+                recCsvPath = null;
+            }
+            bufferedSampleCount = 0;
+            readSampleCount = 0;
+            recordingStartPosition = -1;
         }
 
         private static string AddSuffix(string path, string suffix)

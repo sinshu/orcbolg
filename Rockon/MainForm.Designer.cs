@@ -51,7 +51,7 @@
             this.btnRecord.TabIndex = 0;
             this.btnRecord.Text = "●録音";
             this.btnRecord.UseVisualStyleBackColor = false;
-            this.btnRecord.Click += new System.EventHandler(this.button1_Click);
+            this.btnRecord.Click += new System.EventHandler(this.btnRecord_Click);
             // 
             // picMonitor
             // 
@@ -59,7 +59,7 @@
             this.picMonitor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.picMonitor.Location = new System.Drawing.Point(0, 0);
             this.picMonitor.Name = "picMonitor";
-            this.picMonitor.Size = new System.Drawing.Size(922, 518);
+            this.picMonitor.Size = new System.Drawing.Size(800, 520);
             this.picMonitor.TabIndex = 1;
             this.picMonitor.TabStop = false;
             // 
@@ -73,10 +73,10 @@
             this.pnlBottom.Controls.Add(this.btnRecord);
             this.pnlBottom.Controls.Add(this.pnlControl);
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlBottom.Location = new System.Drawing.Point(0, 518);
+            this.pnlBottom.Location = new System.Drawing.Point(0, 520);
             this.pnlBottom.Name = "pnlBottom";
             this.pnlBottom.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlBottom.Size = new System.Drawing.Size(922, 80);
+            this.pnlBottom.Size = new System.Drawing.Size(800, 80);
             this.pnlBottom.TabIndex = 2;
             // 
             // txtDebug
@@ -87,7 +87,7 @@
             this.txtDebug.Multiline = true;
             this.txtDebug.Name = "txtDebug";
             this.txtDebug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDebug.Size = new System.Drawing.Size(594, 64);
+            this.txtDebug.Size = new System.Drawing.Size(472, 64);
             this.txtDebug.TabIndex = 6;
             // 
             // picInfo
@@ -148,7 +148,9 @@
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Controls.Add(this.picMonitor);
             this.Controls.Add(this.pnlBottom);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Rockon - 録音ツール";
             this.Shown += new System.EventHandler(this.Form1_Shown);

@@ -36,7 +36,7 @@ namespace Rockon
                 monitor = new WaveformMonitor(dspDriver, pictureBox, 2048, true);
                 dspDriver.AddDsp(monitor);
                 recorder = new Recorder(dspDriver);
-                //DspDriver.AddDsp(recorder);
+                DspDriver.AddDsp(recorder);
 
                 dspContext = dspDriver.Run();
             }

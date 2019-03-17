@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace Rockon
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnRecord_Click(object sender, EventArgs e)
         {
             if (recordingState != null)
             {
@@ -80,8 +81,15 @@ namespace Rockon
                 {
                     recordingState.ToggleRecording();
                 }
-                e.Handled = true;
             }
+            else
+            {
+                if (dspComponent != null)
+                {
+                    dspComponent.DspContext.SendMessage("Key_" + e.KeyCode.ToString());
+                }
+            }
+            e.Handled = true;
         }
 
         private void MonitorResize()
@@ -169,7 +177,7 @@ namespace Rockon
             {
                 if (!recording)
                 {
-                    var path = GetNewFileName() + ".wav";
+                    var path = Path.Combine("test", GetNewFileName() + ".wav");
                     form.dspComponent.DspContext.StartRecording(number, path);
                     recording = true;
                     UpdateForm();

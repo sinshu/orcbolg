@@ -63,9 +63,9 @@
     <Compile Include="IntervalCommand.cs" />
     <Compile Include="IRealtimeDsp.cs" />
     <Compile Include="JumpinessWarningCommand.cs" />
+    <Compile Include="MessageCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Recorder.cs" />
-    <Compile Include="RecordingDsp.cs" />
     <Compile Include="StopCommand.cs" />
     <Compile Include="WatchdogDsp.cs" />
     <Compile Include="WaveformMonitor.cs" />
