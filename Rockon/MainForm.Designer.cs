@@ -45,13 +45,12 @@
             // btnRecord
             // 
             this.btnRecord.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnRecord.ForeColor = System.Drawing.Color.Crimson;
             this.btnRecord.Location = new System.Drawing.Point(8, 8);
             this.btnRecord.Name = "btnRecord";
             this.btnRecord.Size = new System.Drawing.Size(64, 64);
             this.btnRecord.TabIndex = 0;
             this.btnRecord.Text = "●録音";
-            this.btnRecord.UseVisualStyleBackColor = true;
+            this.btnRecord.UseVisualStyleBackColor = false;
             this.btnRecord.Click += new System.EventHandler(this.button1_Click);
             // 
             // picMonitor
@@ -102,13 +101,14 @@
             // lblNumber
             // 
             this.lblNumber.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lblNumber.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lblNumber.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lblNumber.ForeColor = System.Drawing.SystemColors.ControlLight;
             this.lblNumber.Location = new System.Drawing.Point(88, 44);
             this.lblNumber.Name = "lblNumber";
+            this.lblNumber.Padding = new System.Windows.Forms.Padding(4, 0, 0, 2);
             this.lblNumber.Size = new System.Drawing.Size(64, 28);
             this.lblNumber.TabIndex = 3;
-            this.lblNumber.Text = "label1";
+            this.lblNumber.Text = "1";
             this.lblNumber.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnNumberIncrement
@@ -145,12 +145,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(922, 598);
+            this.ClientSize = new System.Drawing.Size(800, 600);
             this.Controls.Add(this.picMonitor);
             this.Controls.Add(this.pnlBottom);
+            this.KeyPreview = true;
             this.Name = "MainForm";
-            this.Text = "Rockon - 録音くん2";
+            this.Text = "Rockon - 録音ツール";
             this.Shown += new System.EventHandler(this.Form1_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.picMonitor)).EndInit();
             this.pnlBottom.ResumeLayout(false);
             this.pnlBottom.PerformLayout();

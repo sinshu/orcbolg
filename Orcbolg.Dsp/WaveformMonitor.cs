@@ -15,6 +15,7 @@ namespace Orcbolg.Dsp
 
         private readonly int channelCount;
         private readonly int sampleRate;
+        private readonly string[] channelNames;
 
         private readonly List<Tuple<string, Color>> tuples;
 
@@ -51,6 +52,23 @@ namespace Orcbolg.Dsp
 
                 channelCount = drawOutput ? driver.InputChannelCount + driver.OutputChannelCount : driver.InputChannelCount;
                 sampleRate = driver.SampleRate;
+                channelNames = new string[channelCount];
+                {
+                    var i = 0;
+                    for (var ch = 0; ch < driver.InputChannelCount; ch++)
+                    {
+                        channelNames[i] = driver.GetInputChannelName(ch) + Environment.NewLine;
+                        i++;
+                    }
+                    if (drawOutput)
+                    {
+                        for (var ch = 0; ch < driver.OutputChannelCount; ch++)
+                        {
+                            channelNames[i] = driver.GetOutputChannelName(ch) + Environment.NewLine;
+                            i++;
+                        }
+                    }
+                }
 
                 tuples = new List<Tuple<string, Color>>();
 
@@ -65,20 +83,22 @@ namespace Orcbolg.Dsp
                 clip = new SolidBrush(Color.FromArgb(240, 67, 54));
                 waveform1 = new Brush[channelCount];
                 waveform2 = new Brush[channelCount];
-                var i = 0;
-                for (var ch = 0; ch < driver.InputChannelCount; ch++)
                 {
-                    waveform1[i] = new SolidBrush(Color.FromArgb(0, 230, 118));
-                    waveform2[i] = new SolidBrush(Color.FromArgb(192, 0, 230, 118));
-                    i++;
-                }
-                if (drawOutput)
-                {
-                    for (var ch = 0; ch < driver.OutputChannelCount; ch++)
+                    var i = 0;
+                    for (var ch = 0; ch < driver.InputChannelCount; ch++)
                     {
-                        waveform1[i] = new SolidBrush(Color.FromArgb(0, 176, 255));
-                        waveform2[i] = new SolidBrush(Color.FromArgb(192, 0, 176, 255));
+                        waveform1[i] = new SolidBrush(Color.FromArgb(0, 230, 118));
+                        waveform2[i] = new SolidBrush(Color.FromArgb(192, 0, 230, 118));
                         i++;
+                    }
+                    if (drawOutput)
+                    {
+                        for (var ch = 0; ch < driver.OutputChannelCount; ch++)
+                        {
+                            waveform1[i] = new SolidBrush(Color.FromArgb(0, 176, 255));
+                            waveform2[i] = new SolidBrush(Color.FromArgb(192, 0, 176, 255));
+                            i++;
+                        }
                     }
                 }
 
@@ -101,7 +121,19 @@ namespace Orcbolg.Dsp
 
         private void PictureBox_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(ui_buffer, 0, 0);
+            {
+                var srcRect = new Rectangle(ui_x, 0, ui_buffer.Width - ui_x, ui_buffer.Height);
+                e.Graphics.DrawImage(ui_buffer, 0, 0, srcRect, GraphicsUnit.Pixel);
+            }
+            {
+                var srcRect = new Rectangle(0, 0, ui_x, ui_buffer.Height);
+                e.Graphics.DrawImage(ui_buffer, ui_buffer.Width - ui_x, 0, srcRect, GraphicsUnit.Pixel);
+            }
+            for (var ch = 0; ch < channelCount; ch++)
+            {
+                var top = (int)Math.Round((double)ui_buffer.Height * ch / channelCount);
+                e.Graphics.DrawString(channelNames[ch], font, Brushes.White, 2, top + 2);
+            }
         }
 
         private void ResetStats()

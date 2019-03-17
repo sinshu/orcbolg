@@ -72,6 +72,18 @@ namespace Rockon
             }
         }
 
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Space)
+            {
+                if (recordingState != null)
+                {
+                    recordingState.ToggleRecording();
+                }
+                e.Handled = true;
+            }
+        }
+
         private void MonitorResize()
         {
             dspComponent.Monitor.Resize();
@@ -113,7 +125,7 @@ namespace Rockon
                 {
                     form.pnlBottom.BackColor = Color.LightPink;
                     form.btnRecord.BackColor = Color.LightPink;
-                    form.btnRecord.ForeColor = Color.Empty;
+                    form.btnRecord.ForeColor = Color.DarkRed;
                     form.btnRecord.Text = "■停止";
                     form.btnNumberDecrement.BackColor = Color.LightPink;
                     form.btnNumberDecrement.ForeColor = Color.DarkRed;
@@ -128,7 +140,7 @@ namespace Rockon
                 {
                     form.pnlBottom.BackColor = Color.Empty;
                     form.btnRecord.BackColor = Color.Empty;
-                    form.btnRecord.ForeColor = Color.DarkRed;
+                    form.btnRecord.ForeColor = Color.Empty;
                     form.btnRecord.Text = "●録音";
                     form.btnNumberDecrement.BackColor = Color.Empty;
                     form.btnNumberDecrement.ForeColor = Color.Empty;
