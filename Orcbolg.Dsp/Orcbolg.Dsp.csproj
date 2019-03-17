@@ -47,7 +47,7 @@
   <ItemGroup>
     <Compile Include="AsioDspDriver.cs" />
     <Compile Include="AsioDspSetting.cs" />
-    <Compile Include="BypassDsp.cs" />
+    <Compile Include="Bypass.cs" />
     <Compile Include="DspBuffer.cs" />
     <Compile Include="DspBufferEntry.cs" />
     <Compile Include="DspException.cs" />
@@ -62,12 +62,12 @@
     <Compile Include="INonrealtimeDsp.cs" />
     <Compile Include="IntervalCommand.cs" />
     <Compile Include="IRealtimeDsp.cs" />
-    <Compile Include="JumpinessWarningCommand.cs" />
+    <Compile Include="JumpingWarningCommand.cs" />
     <Compile Include="MessageCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Recorder.cs" />
     <Compile Include="StopCommand.cs" />
-    <Compile Include="WatchdogDsp.cs" />
+    <Compile Include="Watchdog.cs" />
     <Compile Include="WaveformMonitor.cs" />
   </ItemGroup>
   <ItemGroup>

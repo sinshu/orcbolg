@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace Orcbolg.Dsp
 {
-    public class JumpinessWarningCommand : IDspCommand
+    public class JumpingWarningCommand : IDspCommand
     {
         private readonly long position;
 
-        public JumpinessWarningCommand(long position)
+        public JumpingWarningCommand(long position)
         {
             this.position = position;
         }

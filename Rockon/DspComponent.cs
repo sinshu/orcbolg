@@ -10,7 +10,7 @@ namespace Rockon
     {
         private AsioDspSetting dspSetting;
         private IDspDriver dspDriver;
-        private BypassDsp bypass;
+        private Bypass bypass;
         private WaveformMonitor monitor;
         private Recorder recorder;
         private IDspContext dspContext;
@@ -31,7 +31,7 @@ namespace Rockon
 
                 dspDriver = new AsioDspDriver(dspSetting);
                 //dspDriver = new FileDspDriver("test_dsp.wav", 123, "output.wav", 2);
-                bypass = new BypassDsp(dspDriver);
+                bypass = new Bypass(dspDriver);
                 dspDriver.AddDsp(bypass);
                 monitor = new WaveformMonitor(dspDriver, pictureBox, 2048, true);
                 dspDriver.AddDsp(monitor);
@@ -85,7 +85,7 @@ namespace Rockon
 
         public AsioDspSetting DspSetting => dspSetting;
         public IDspDriver DspDriver => dspDriver;
-        public BypassDsp Bypass => bypass;
+        public Bypass Bypass => bypass;
         public WaveformMonitor Monitor => monitor;
         public IDspContext DspContext => dspContext;
     }

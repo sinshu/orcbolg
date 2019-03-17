@@ -22,7 +22,7 @@ namespace Orcbolg.Dsp
         private string recCsvPath;
         private StreamWriter csvWriter;
         private int bufferedSampleCount;
-        private int readSampleCount;
+        private int processedSampleCount;
         private long recordingStartPosition;
 
         public Recorder(IDspDriver driver)
@@ -39,7 +39,7 @@ namespace Orcbolg.Dsp
             recCsvPath = null;
             csvWriter = null;
             bufferedSampleCount = 0;
-            readSampleCount = 0;
+            processedSampleCount = 0;
             recordingStartPosition = -1;
         }
 
@@ -92,7 +92,7 @@ namespace Orcbolg.Dsp
             csvWriter = new StreamWriter(recCsvPath);
             csvWriter.WriteLine("Position,Message");
             bufferedSampleCount = 0;
-            readSampleCount = 0;
+            processedSampleCount = 0;
             recordingStartPosition = -1;
         }
 
@@ -142,14 +142,14 @@ namespace Orcbolg.Dsp
                 }
             }
 
-            readSampleCount += command.Length;
+            processedSampleCount += command.Length;
         }
 
         private void Process(IDspContext context, MessageCommand command)
         {
             if (csvWriter != null)
             {
-                csvWriter.WriteLine(readSampleCount + "," + command.Value);
+                csvWriter.WriteLine(processedSampleCount + "," + command.Value);
             }
         }
 
@@ -172,7 +172,7 @@ namespace Orcbolg.Dsp
                 recCsvPath = null;
             }
             bufferedSampleCount = 0;
-            readSampleCount = 0;
+            processedSampleCount = 0;
             recordingStartPosition = -1;
         }
 

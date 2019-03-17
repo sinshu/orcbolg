@@ -5,9 +5,9 @@ using NAudio.Wave;
 
 namespace Orcbolg.Dsp
 {
-    public class WatchdogDsp : INonrealtimeDsp
+    public class Watchdog : INonrealtimeDsp
     {
-        public WatchdogDsp()
+        public Watchdog()
         {
         }
 

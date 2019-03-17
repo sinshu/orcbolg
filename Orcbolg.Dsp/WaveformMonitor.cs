@@ -200,7 +200,7 @@ namespace Orcbolg.Dsp
                 Process(context, messageCommand);
             }
 
-            var jumpinessWarningCommand = command as JumpinessWarningCommand;
+            var jumpinessWarningCommand = command as JumpingWarningCommand;
             if (jumpinessWarningCommand != null)
             {
                 Process(context, jumpinessWarningCommand);
@@ -359,7 +359,7 @@ namespace Orcbolg.Dsp
             messages.Add(Tuple.Create(command.Value + Environment.NewLine, Color.FromArgb(240, 0, 188, 212)));
         }
 
-        private void Process(IDspContext context, JumpinessWarningCommand command)
+        private void Process(IDspContext context, JumpingWarningCommand command)
         {
 
         }

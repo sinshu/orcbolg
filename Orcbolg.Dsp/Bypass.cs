@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Orcbolg.Dsp
 {
-    public class BypassDsp : IRealtimeDsp
+    public class Bypass : IRealtimeDsp
     {
-        public BypassDsp(IDspDriver driver)
+        public Bypass(IDspDriver driver)
         {
         }
 
