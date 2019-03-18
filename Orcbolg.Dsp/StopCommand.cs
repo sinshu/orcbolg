@@ -18,7 +18,13 @@ namespace Orcbolg.Dsp
             this.exception = exception;
         }
 
-        internal Exception Exception => exception;
+        internal Exception Exception
+        {
+            get
+            {
+                return exception;
+            }
+        }
     }
 
     public static class StopCommandEx

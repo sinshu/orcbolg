@@ -74,10 +74,16 @@ namespace Orcbolg.Dsp
                 Process(context, intervalCommand);
             }
 
-            var messageCommand = command as MessageCommand;
-            if (messageCommand != null)
+            var keyDownCommand = command as KeyDownCommand;
+            if (keyDownCommand != null)
             {
-                Process(context, messageCommand);
+                Process(context, keyDownCommand);
+            }
+
+            var jumpingWarningCommand = command as JumpingWarningCommand;
+            if (jumpingWarningCommand != null)
+            {
+                Process(context, jumpingWarningCommand);
             }
         }
 
@@ -145,11 +151,23 @@ namespace Orcbolg.Dsp
             processedSampleCount += command.Length;
         }
 
-        private void Process(IDspContext context, MessageCommand command)
+        private void Process(IDspContext context, KeyDownCommand command)
         {
             if (csvWriter != null)
             {
-                csvWriter.WriteLine(processedSampleCount + "," + command.Value);
+                csvWriter.WriteLine(processedSampleCount + ",Key_" + command.Value);
+            }
+        }
+
+        private void Process(IDspContext context, JumpingWarningCommand command)
+        {
+            if (csvWriter != null && recordingStartPosition != -1)
+            {
+                var position = command.Position - recordingStartPosition;
+                if (position >= 0)
+                {
+                    csvWriter.WriteLine(position + ",Jumping");
+                }
             }
         }
 

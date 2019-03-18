@@ -132,8 +132,21 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public Task RealtimeDspCompletion => realtimeDspCompletion;
-        public Task NonrealtimeDspCompletion => nonrealtimeDspCompletion;
+        public Task RealtimeDspCompletion
+        {
+            get
+            {
+                return realtimeDspCompletion;
+            }
+        }
+
+        public Task NonrealtimeDspCompletion
+        {
+            get
+            {
+                return nonrealtimeDspCompletion;
+            }
+        }
 
 
 
@@ -189,7 +202,13 @@ namespace Orcbolg.Dsp
                 actionBlock.Complete();
             }
 
-            public Task Completion => actionBlock.Completion;
+            public Task Completion
+            {
+                get
+                {
+                    return actionBlock.Completion;
+                }
+            }
         }
     }
 }

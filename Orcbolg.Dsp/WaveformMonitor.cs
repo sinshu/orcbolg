@@ -194,16 +194,16 @@ namespace Orcbolg.Dsp
                 Process(context, recordingStopCommand);
             }
 
-            var messageCommand = command as MessageCommand;
-            if (messageCommand != null)
+            var keyDownCommand = command as KeyDownCommand;
+            if (keyDownCommand != null)
             {
-                Process(context, messageCommand);
+                Process(context, keyDownCommand);
             }
 
-            var jumpinessWarningCommand = command as JumpingWarningCommand;
-            if (jumpinessWarningCommand != null)
+            var jumpingWarningCommand = command as JumpingWarningCommand;
+            if (jumpingWarningCommand != null)
             {
-                Process(context, jumpinessWarningCommand);
+                Process(context, jumpingWarningCommand);
             }
         }
 
@@ -335,7 +335,7 @@ namespace Orcbolg.Dsp
             {
                 foreach (var tuple in messages)
                 {
-                    var size= ui_g.MeasureString(tuple.Item1, font);
+                    var size = ui_g.MeasureString(tuple.Item1, font);
                     using (var brush = new SolidBrush(tuple.Item2))
                     {
                         ui_g.FillRectangle(brush, ui_x, 0, 1, ui_buffer.Height);
@@ -354,19 +354,31 @@ namespace Orcbolg.Dsp
             pictureBox.Refresh();
         }
 
-        private void Process(IDspContext context, MessageCommand command)
+        private void Process(IDspContext context, KeyDownCommand command)
         {
             messages.Add(Tuple.Create(command.Value + Environment.NewLine, Color.FromArgb(240, 0, 188, 212)));
         }
 
         private void Process(IDspContext context, JumpingWarningCommand command)
         {
-
+            messages.Add(Tuple.Create("JUMPING" + Environment.NewLine, Color.FromArgb(240, 255, 152, 0)));
         }
 
         public void Dispose()
         {
             pictureBox.Paint -= PictureBox_Paint;
+
+            if (recordingColor != null)
+            {
+                recordingColor.Dispose();
+                recordingColor = null;
+            }
+
+            if (font != null)
+            {
+                font.Dispose();
+                font = null;
+            }
 
             if (ui_g != null)
             {
@@ -414,6 +426,7 @@ namespace Orcbolg.Dsp
                         brush.Dispose();
                     }
                 }
+                waveform2 = null;
             }
         }
     }

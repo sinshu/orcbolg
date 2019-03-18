@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Orcbolg.Dsp
 {
-    internal class DspBuffer
+    internal sealed class DspBuffer
     {
         private readonly int inputChannelCount;
         private readonly int outputChannelCount;
@@ -80,9 +80,36 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public int InputChannelCount => inputChannelCount;
-        public int OutputChannelCount => outputChannelCount;
-        public int IntervalLength => intervalLength;
-        public int EntryCount => entryCount;
+        public int InputChannelCount
+        {
+            get
+            {
+                return inputChannelCount;
+            }
+        }
+
+        public int OutputChannelCount
+        {
+            get
+            {
+                return outputChannelCount;
+            }
+        }
+
+        public int IntervalLength
+        {
+            get
+            {
+                return intervalLength;
+            }
+        }
+
+        public int EntryCount
+        {
+            get
+            {
+                return entryCount;
+            }
+        }
     }
 }

@@ -13,6 +13,12 @@ namespace Orcbolg.Dsp
             this.position = position;
         }
 
-        public long Position => position;
+        public long Position
+        {
+            get
+            {
+                return position;
+            }
+        }
     }
 }

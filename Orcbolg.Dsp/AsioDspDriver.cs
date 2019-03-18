@@ -202,11 +202,45 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public string DriverName => driverName;
-        public int SampleRate => sampleRate;
-        public int InputChannelCount => asioInputChannelIndices.Length;
-        public int OutputChannelCount => asioOutputChannelIndices.Length;
-        public int IntervalLength => intervalLength;
+        public string DriverName
+        {
+            get
+            {
+                return driverName;
+            }
+        }
+
+        public int SampleRate
+        {
+            get
+            {
+                return sampleRate;
+            }
+        }
+
+        public int InputChannelCount
+        {
+            get
+            {
+                return asioInputChannelIndices.Length;
+            }
+        }
+
+        public int OutputChannelCount
+        {
+            get
+            {
+                return asioOutputChannelIndices.Length;
+            }
+        }
+
+        public int IntervalLength
+        {
+            get
+            {
+                return intervalLength;
+            }
+        }
 
 
 
@@ -361,8 +395,21 @@ namespace Orcbolg.Dsp
                 scheduler.Post(command);
             }
 
-            public long ProcessedSampleCount => Interlocked.Read(ref processedSampleCount);
-            public Task Completion => completion;
+            public long ProcessedSampleCount
+            {
+                get
+                {
+                    return Interlocked.Read(ref processedSampleCount);
+                }
+            }
+
+            public Task Completion
+            {
+                get
+                {
+                    return completion;
+                }
+            }
         }
     }
 }

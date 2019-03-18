@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Orcbolg.Dsp
 {
-    public class AsioDspSetting
+    public sealed class AsioDspSetting
     {
         private readonly string driverName;
         private readonly int sampleRate;
@@ -29,33 +29,55 @@ namespace Orcbolg.Dsp
 
         public string DriverName
         {
-            get => driverName;
+            get
+            {
+                return driverName;
+            }
         }
 
         public int SampleRate
         {
-            get => sampleRate;
+            get
+            {
+                return sampleRate;
+            }
         }
 
         public int BufferLength
         {
-            get => bufferLength;
+            get
+            {
+                return bufferLength;
+            }
         }
 
         public IList<int> InputChannels
         {
-            get => inputChannels;
+            get
+            {
+                return inputChannels;
+            }
         }
 
         public IList<int> OutputChannels
         {
-            get => outputChannels;
+            get
+            {
+                return outputChannels;
+            }
         }
 
         public bool UseLongInterval
         {
-            get => useLongInterval;
-            set => useLongInterval = value;
+            get
+            {
+                return useLongInterval;
+            }
+
+            set
+            {
+                useLongInterval = value;
+            }
         }
     }
 }

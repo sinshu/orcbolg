@@ -86,7 +86,7 @@ namespace Rockon
             {
                 if (dspComponent != null)
                 {
-                    dspComponent.DspContext.SendMessage("Key_" + e.KeyCode.ToString());
+                    dspComponent.DspContext.OnKeyDown(e.KeyCode.ToString());
                 }
             }
             e.Handled = true;

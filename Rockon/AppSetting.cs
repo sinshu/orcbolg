@@ -116,12 +116,53 @@ namespace Rockon
             return sb.ToString();
         }
 
-        public string CfgPath => path;
-        public string DriverName => driverName;
-        public int SampleRate => sampleRate;
-        public int BufferLength => bufferLength;
-        public IReadOnlyList<int> InputChannels => inputChannels;
-        public IReadOnlyList<int> OutputChannels => outputChannels;
+        public string CfgPath
+        {
+            get
+            {
+                return path;
+            }
+        }
+
+        public string DriverName
+        {
+            get
+            {
+                return driverName;
+            }
+        }
+
+        public int SampleRate
+        {
+            get
+            {
+                return sampleRate;
+            }
+        }
+
+        public int BufferLength
+        {
+            get
+            {
+                return bufferLength;
+            }
+        }
+
+        public IReadOnlyList<int> InputChannels
+        {
+            get
+            {
+                return inputChannels;
+            }
+        }
+
+        public IReadOnlyList<int> OutputChannels
+        {
+            get
+            {
+                return outputChannels;
+            }
+        }
 
 
 
@@ -143,9 +184,29 @@ namespace Rockon
                 return "(" + key + ", " + value + ", " + position + ")";
             }
 
-            public string Key => key;
-            public string Value => value;
-            public int Position => position;
+            public string Key
+            {
+                get
+                {
+                    return key;
+                }
+            }
+
+            public string Value
+            {
+                get
+                {
+                    return value;
+                }
+            }
+
+            public int Position
+            {
+                get
+                {
+                    return position;
+                }
+            }
         }
     }
 }

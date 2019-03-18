@@ -56,32 +56,80 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public float[][] InputInterval => inputInterval;
-        public float[][] OutputInterval => outputInterval;
-        public bool Used => used;
+        public float[][] InputInterval
+        {
+            get
+            {
+                return inputInterval;
+            }
+        }
+
+        public float[][] OutputInterval
+        {
+            get
+            {
+                return outputInterval;
+            }
+        }
+
+        public bool Used
+        {
+            get
+            {
+                return used;
+            }
+        }
 
         public long Position
         {
-            get => position;
-            internal set => position = value;
+            get
+            {
+                return position;
+            }
+
+            set
+            {
+                position = value;
+            }
         }
 
         public TimeSpan DspStartTime
         {
-            get => dspStartTime;
-            internal set => dspStartTime = value;
+            get
+            {
+                return dspStartTime;
+            }
+
+            set
+            {
+                dspStartTime = value;
+            }
         }
 
         public TimeSpan DspEndTime
         {
-            get => dspEndTime;
-            internal set => dspEndTime = value;
+            get
+            {
+                return dspEndTime;
+            }
+
+            set
+            {
+                dspEndTime = value;
+            }
         }
 
         public DateTime GlobalTime
         {
-            get => globalTime;
-            internal set => globalTime = value;
+            get
+            {
+                return globalTime;
+            }
+
+            set
+            {
+                globalTime = value;
+            }
         }
     }
 }

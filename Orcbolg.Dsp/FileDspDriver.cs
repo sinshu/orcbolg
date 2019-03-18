@@ -73,41 +73,7 @@ namespace Orcbolg.Dsp
         public IDspContext Run()
         {
             var context = new Context(this);
-            context.Completion = Task.Run(() => Run(context));
             return context;
-        }
-
-        private void Run(Context context)
-        {
-            while (true)
-            {
-                var read = DspHelper.FillBuffer(reader, readBuffer);
-                var sampleCount = read / reader.WaveFormat.BlockAlign;
-                if (sampleCount == 0)
-                {
-                    return;
-                }
-
-                DspHelper.ReadInt16(readBuffer, entry.InputInterval, sampleCount);
-                var command = new IntervalCommand(entry, sampleCount);
-
-                foreach (var dsp in realtimeDsps)
-                {
-                    dsp.Process(command.InputInterval, command.OutputInterval, sampleCount);
-                }
-
-                if (writer != null)
-                {
-                    DspHelper.WriteInt16(command.OutputInterval, writeBuffer, sampleCount);
-                    writer.Write(writeBuffer, 0, writer.WaveFormat.BlockAlign * sampleCount);
-                }
-
-                context.Post(command);
-                if (sampleCount < intervalLength)
-                {
-                    return;
-                }
-            }
         }
 
         public void Dispose()
@@ -134,11 +100,45 @@ namespace Orcbolg.Dsp
             return "Output " + (channel + 1);
         }
 
-        public string DriverName => inputFileName;
-        public int SampleRate => reader.WaveFormat.SampleRate;
-        public int InputChannelCount => reader.WaveFormat.Channels;
-        public int OutputChannelCount => outputChannelCount;
-        public int IntervalLength => intervalLength;
+        public string DriverName
+        {
+            get
+            {
+                return inputFileName;
+            }
+        }
+
+        public int SampleRate
+        {
+            get
+            {
+                return reader.WaveFormat.SampleRate;
+            }
+        }
+
+        public int InputChannelCount
+        {
+            get
+            {
+                return reader.WaveFormat.Channels;
+            }
+        }
+
+        public int OutputChannelCount
+        {
+            get
+            {
+                return outputChannelCount;
+            }
+        }
+
+        public int IntervalLength
+        {
+            get
+            {
+                return intervalLength;
+            }
+        }
 
 
 
@@ -148,11 +148,48 @@ namespace Orcbolg.Dsp
 
             private long processedSampleCount;
 
+            private Task completion;
+
             public Context(FileDspDriver driver)
             {
                 this.driver = driver;
 
                 processedSampleCount = 0;
+
+                completion = Task.Run((Action)Run);
+            }
+
+            private void Run()
+            {
+                while (true)
+                {
+                    var read = DspHelper.FillBuffer(driver.reader, driver.readBuffer);
+                    var sampleCount = read / driver.reader.WaveFormat.BlockAlign;
+                    if (sampleCount == 0)
+                    {
+                        return;
+                    }
+
+                    DspHelper.ReadInt16(driver.readBuffer, driver.entry.InputInterval, sampleCount);
+                    var command = new IntervalCommand(driver.entry, sampleCount);
+
+                    foreach (var dsp in driver.realtimeDsps)
+                    {
+                        dsp.Process(command.InputInterval, command.OutputInterval, sampleCount);
+                    }
+
+                    if (driver.writer != null)
+                    {
+                        DspHelper.WriteInt16(command.OutputInterval, driver.writeBuffer, sampleCount);
+                        driver.writer.Write(driver.writeBuffer, 0, driver.writer.WaveFormat.BlockAlign * sampleCount);
+                    }
+
+                    Post(command);
+                    if (sampleCount < driver.intervalLength)
+                    {
+                        return;
+                    }
+                }
             }
 
             public void Post(IDspCommand command)
@@ -169,8 +206,21 @@ namespace Orcbolg.Dsp
                 }
             }
 
-            public long ProcessedSampleCount => processedSampleCount;
-            public Task Completion { get; set; }
+            public long ProcessedSampleCount
+            {
+                get
+                {
+                    return processedSampleCount;
+                }
+            }
+
+            public Task Completion
+            {
+                get
+                {
+                    return completion;
+                }
+            }
         }
     }
 }

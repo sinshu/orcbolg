@@ -13,6 +13,7 @@ namespace Rockon
         private Bypass bypass;
         private WaveformMonitor monitor;
         private Recorder recorder;
+        private Watchdog watchdog;
         private IDspContext dspContext;
 
         public DspComponent(AppSetting appSetting, PictureBox pictureBox)
@@ -36,7 +37,9 @@ namespace Rockon
                 monitor = new WaveformMonitor(dspDriver, pictureBox, 2048, true);
                 dspDriver.AddDsp(monitor);
                 recorder = new Recorder(dspDriver);
-                DspDriver.AddDsp(recorder);
+                dspDriver.AddDsp(recorder);
+                watchdog = new Watchdog(dspDriver);
+                dspDriver.AddDsp(watchdog);
 
                 dspContext = dspDriver.Run();
             }
@@ -83,10 +86,52 @@ namespace Rockon
             }
         }
 
-        public AsioDspSetting DspSetting => dspSetting;
-        public IDspDriver DspDriver => dspDriver;
-        public Bypass Bypass => bypass;
-        public WaveformMonitor Monitor => monitor;
-        public IDspContext DspContext => dspContext;
+        public AsioDspSetting DspSetting
+        {
+            get
+            {
+                return dspSetting;
+            }
+        }
+
+        public IDspDriver DspDriver
+        {
+            get
+            {
+                return dspDriver;
+            }
+        }
+
+        public Bypass Bypass
+        {
+            get
+            {
+                return bypass;
+            }
+        }
+
+        public WaveformMonitor Monitor
+        {
+            get
+            {
+                return monitor;
+            }
+        }
+
+        public Watchdog Watchdog
+        {
+            get
+            {
+                return watchdog;
+            }
+        }
+
+        public IDspContext DspContext
+        {
+            get
+            {
+                return dspContext;
+            }
+        }
     }
 }
