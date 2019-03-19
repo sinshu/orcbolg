@@ -14,6 +14,7 @@ namespace Rockon
     internal partial class MainForm : Form
     {
         private bool running;
+
         private AppSetting appSetting;
         private DspComponent dspComponent;
         private RecordingState recordingState;
@@ -51,60 +52,58 @@ namespace Rockon
 
         private void btnRecord_Click(object sender, EventArgs e)
         {
-            if (recordingState != null)
-            {
-                recordingState.ToggleRecording();
-            }
+            recordingState?.ToggleRecording();
         }
 
         private void btnNumberDecrement_Click(object sender, EventArgs e)
         {
-            if (recordingState != null)
-            {
-                recordingState.DecrementNumber();
-            }
+            recordingState?.DecrementNumber();
         }
 
         private void btnNumberIncrement_Click(object sender, EventArgs e)
         {
-            if (recordingState != null)
-            {
-                recordingState.IncrementNumber();
-            }
+            recordingState?.IncrementNumber();
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Space)
+            switch (e.KeyData)
             {
-                if (recordingState != null)
-                {
-                    recordingState.ToggleRecording();
-                }
-            }
-            else
-            {
-                if (dspComponent != null)
-                {
-                    dspComponent.DspContext.OnKeyDown(e.KeyCode.ToString());
-                }
+                case Keys.Space:
+                    recordingState?.ToggleRecording();
+                    break;
+                case Keys.Oemcomma:
+                    recordingState?.DecrementNumber();
+                    break;
+                case Keys.OemPeriod:
+                    recordingState?.IncrementNumber();
+                    break;
+                case Keys.OemOpenBrackets:
+                    recordingState?.UpChannelFocus();
+                    break;
+                case Keys.Oem6:
+                    recordingState?.DownChannelFocus();
+                    break;
+                default:
+                    dspComponent?.DspContext.OnKeyDown(e.KeyCode.ToString());
+                    break;
             }
             e.Handled = true;
         }
 
         private void MonitorResize()
         {
-            dspComponent.Monitor.Resize();
+            dspComponent?.Monitor.Resize();
         }
 
         private void ClosingStart()
         {
-            dspComponent.DspContext.Stop();
+            dspComponent?.DspContext.Stop();
         }
 
         private void ClosingEnd()
         {
-            dspComponent.Dispose();
+            dspComponent?.Dispose();
         }
 
 
@@ -116,12 +115,16 @@ namespace Rockon
             private int number;
             private bool recording;
 
+            private int channelFocus;
+
             public RecordingState(MainForm form)
             {
                 this.form = form;
 
                 number = 1;
                 recording = false;
+
+                channelFocus = 0;
 
                 UpdateForm();
             }
@@ -177,10 +180,17 @@ namespace Rockon
             {
                 if (!recording)
                 {
-                    var path = Path.Combine("test", GetNewFileName() + ".wav");
-                    form.dspComponent.DspContext.StartRecording(number, path);
-                    recording = true;
-                    UpdateForm();
+                    if (Directory.Exists(form.appSetting.RecordingDirectory))
+                    {
+                        var path = Path.Combine(form.appSetting.RecordingDirectory, GetNewFileName() + ".wav");
+                        form.dspComponent.DspContext.StartRecording(number, path);
+                        recording = true;
+                        UpdateForm();
+                    }
+                    else
+                    {
+                        Console.WriteLine("ｳﾜｧｰ");
+                    }
                 }
             }
 
@@ -210,6 +220,20 @@ namespace Rockon
             private string GetNewFileName()
             {
                 return DateTime.Now.ToString("yyyyMMdd_HHmmss_") + number.ToString("0000");
+            }
+
+            public void UpChannelFocus()
+            {
+                channelFocus = Math.Max(channelFocus - 1, 0);
+                form.dspComponent.Monitor.SetChannelFocus(channelFocus);
+                form.picMonitor.Refresh();
+            }
+
+            public void DownChannelFocus()
+            {
+                channelFocus = Math.Min(channelFocus + 1, form.dspComponent.DspDriver.InputChannelCount - 1);
+                form.dspComponent.Monitor.SetChannelFocus(channelFocus);
+                form.picMonitor.Refresh();
             }
         }
     }

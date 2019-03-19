@@ -9,27 +9,35 @@ namespace Rockon
 {
     internal class AppSetting
     {
-        private readonly string path;
+        private static readonly string defaultDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+        private static readonly string defaultCfgName = "rockon.cfg";
+        private static readonly char[] separators = new[] { ',' };
+
+        private readonly string cfgPath;
         private readonly string driverName;
         private readonly int sampleRate;
         private readonly int bufferLength;
+        private readonly int updateCycle;
         private readonly int[] inputChannels;
         private readonly int[] outputChannels;
+        private readonly string recordingDirectory;
 
-        public AppSetting() : this(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "rockon.cfg"))
+        public AppSetting() : this(Path.Combine(defaultDirectory, defaultCfgName))
         {
         }
 
-        public AppSetting(string path)
+        public AppSetting(string cfgPath)
         {
-            this.path = path;
+            this.cfgPath = cfgPath;
 
-            var dic = Read(path);
+            var dic = Read(cfgPath);
             driverName = GetString(dic, "driver_name");
             sampleRate = GetInt(dic, "sample_rate_hz");
             bufferLength = sampleRate * GetInt(dic, "buffer_length_sec");
+            updateCycle = GetInt(dic, "update_cycle");
             inputChannels = GetIntList(dic, "input_channels").Select(x => x - 1).ToArray();
             outputChannels = GetIntList(dic, "output_channels").Select(x => x - 1).ToArray();
+            recordingDirectory = Path.Combine(defaultDirectory, GetString(dic, "rec_directory"));
         }
 
         private static Dictionary<string, LineInfo> Read(string path)
@@ -64,7 +72,7 @@ namespace Rockon
             }
             catch (KeyNotFoundException)
             {
-                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(path) + ")");
+                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(cfgPath) + ")");
             }
             if (int.TryParse(info.Value, out value))
             {
@@ -72,7 +80,7 @@ namespace Rockon
             }
             else
             {
-                throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(path) + ", 行 " + info.Position + ")");
+                throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
             }
         }
 
@@ -85,9 +93,9 @@ namespace Rockon
             }
             catch (KeyNotFoundException)
             {
-                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(path) + ")");
+                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(cfgPath) + ")");
             }
-            var split = info.Value.Split(',');
+            var split = info.Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             var values = new int[split.Length];
             for (var i = 0; i < split.Length; i++)
             {
@@ -98,7 +106,7 @@ namespace Rockon
                 }
                 else
                 {
-                    throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(path) + ", 行 " + info.Position + ")");
+                    throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
                 }
             }
             return values;
@@ -111,8 +119,10 @@ namespace Rockon
             sb.Append(nameof(DriverName)).Append(" = ").Append(DriverName).AppendLine(",");
             sb.Append(nameof(SampleRate)).Append(" = ").Append(SampleRate).AppendLine(",");
             sb.Append(nameof(BufferLength)).Append(" = ").Append(BufferLength).AppendLine(",");
+            sb.Append(nameof(UpdateCycle)).Append(" = ").Append(UpdateCycle).AppendLine(",");
             sb.Append(nameof(InputChannels)).Append(" = { ").Append(string.Join(", ", InputChannels)).AppendLine(" },");
             sb.Append(nameof(OutputChannels)).Append(" = { ").Append(string.Join(", ", OutputChannels)).AppendLine(" },");
+            sb.Append(nameof(RecordingDirectory)).Append(" = ").Append(RecordingDirectory).AppendLine();
             return sb.ToString();
         }
 
@@ -120,7 +130,7 @@ namespace Rockon
         {
             get
             {
-                return path;
+                return cfgPath;
             }
         }
 
@@ -148,6 +158,14 @@ namespace Rockon
             }
         }
 
+        public int UpdateCycle
+        {
+            get
+            {
+                return updateCycle;
+            }
+        }
+
         public IReadOnlyList<int> InputChannels
         {
             get
@@ -161,6 +179,14 @@ namespace Rockon
             get
             {
                 return outputChannels;
+            }
+        }
+
+        public string RecordingDirectory
+        {
+            get
+            {
+                return recordingDirectory;
             }
         }
 

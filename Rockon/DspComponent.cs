@@ -31,10 +31,10 @@ namespace Rockon
                 }
 
                 dspDriver = new AsioDspDriver(dspSetting);
-                //dspDriver = new FileDspDriver("test_dsp.wav", 123, "output.wav", 2);
                 bypass = new Bypass(dspDriver);
                 dspDriver.AddDsp(bypass);
-                monitor = new WaveformMonitor(dspDriver, pictureBox, 2048, true);
+                monitor = new WaveformMonitor(dspDriver, pictureBox, appSetting.UpdateCycle, false);
+                monitor.SetChannelFocus(0);
                 dspDriver.AddDsp(monitor);
                 recorder = new Recorder(dspDriver);
                 dspDriver.AddDsp(recorder);
