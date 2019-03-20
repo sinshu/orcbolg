@@ -333,7 +333,9 @@ namespace Orcbolg.Dsp
                     if (entry == null)
                     {
                         stopped = true;
-                        throw new DspException("Buffer length is not sufficient.");
+                        var e = new DspException("Buffer length is not sufficient.");
+                        e.Data["thrower"] = this;
+                        throw e;
                     }
                     entry.Position = processedSampleCount;
                     entry.DspStartTime = stopwatch.Elapsed;

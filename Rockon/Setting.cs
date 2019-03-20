@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Rockon
 {
-    internal class AppSetting
+    internal class Setting
     {
         private static readonly string defaultDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
         private static readonly string defaultCfgName = "rockon.cfg";
@@ -22,11 +22,11 @@ namespace Rockon
         private readonly int[] outputChannels;
         private readonly string recordingDirectory;
 
-        public AppSetting() : this(Path.Combine(defaultDirectory, defaultCfgName))
+        public Setting() : this(Path.Combine(defaultDirectory, defaultCfgName))
         {
         }
 
-        public AppSetting(string cfgPath)
+        public Setting(string cfgPath)
         {
             this.cfgPath = cfgPath;
 

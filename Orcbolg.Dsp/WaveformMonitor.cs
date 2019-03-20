@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Orcbolg.Dsp
@@ -24,6 +25,7 @@ namespace Orcbolg.Dsp
         private Brush focusedChannelNameColor;
 
         private bool recording;
+        private int recordingNumber;
         private Brush recordingColor;
 
         private List<Tuple<string, Color>> messages;
@@ -44,6 +46,8 @@ namespace Orcbolg.Dsp
         private Graphics ui_g;
         private int ui_x;
         private int ui_sampleCount;
+
+        private long processedSampleCount;
 
         public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateCycle, bool showOutput)
         {
@@ -80,6 +84,7 @@ namespace Orcbolg.Dsp
                 focusedChannelNameColor = new SolidBrush(Color.FromArgb(244, 67, 54));
 
                 recording = false;
+                recordingNumber = 0;
                 recordingColor = new SolidBrush(Color.FromArgb(64, 244, 67, 54));
 
                 messages = new List<Tuple<string, Color>>();
@@ -115,6 +120,8 @@ namespace Orcbolg.Dsp
                 }
 
                 Reset();
+
+                processedSampleCount = 0;
 
                 pictureBox.Paint += PictureBox_Paint;
             }
@@ -204,6 +211,12 @@ namespace Orcbolg.Dsp
                 Process(context, recordingStopCommand);
             }
 
+            var recordingAbortCommand = command as RecordingAbortCommand;
+            if (recordingAbortCommand != null)
+            {
+                Process(context, recordingAbortCommand);
+            }
+
             var keyDownCommand = command as KeyDownCommand;
             if (keyDownCommand != null)
             {
@@ -262,18 +275,27 @@ namespace Orcbolg.Dsp
                     ResetSignalStats();
                 }
             }
+
+            Interlocked.Add(ref processedSampleCount, command.Length);
         }
 
         private void Process(IDspContext context, RecordingStartCommand command)
         {
             recording = true;
+            recordingNumber = command.Number;
             messages.Add(Tuple.Create("REC" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
         private void Process(IDspContext context, RecordingStopCommand command)
         {
             recording = false;
-            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 244, 67, 54)));
+            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + recordingNumber + "]", Color.FromArgb(240, 244, 67, 54)));
+        }
+
+        private void Process(IDspContext context, RecordingAbortCommand command)
+        {
+            recording = false;
+            messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + recordingNumber + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
         private void UpdateBuffer()
@@ -453,6 +475,14 @@ namespace Orcbolg.Dsp
             {
                 channelNameColor.Dispose();
                 channelNameColor = null;
+            }
+        }
+
+        public long ProcessedSampleCount
+        {
+            get
+            {
+                return Interlocked.Read(ref processedSampleCount);
             }
         }
     }

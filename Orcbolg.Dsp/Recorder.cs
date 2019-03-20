@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NAudio.Wave;
 
 namespace Orcbolg.Dsp
@@ -21,9 +22,12 @@ namespace Orcbolg.Dsp
         private string dstCsvPath;
         private string recCsvPath;
         private StreamWriter csvWriter;
+        private long recordingSampleCount;
         private int bufferedSampleCount;
-        private int processedSampleCount;
+        private long recordedSampleCount;
+
         private long recordingStartPosition;
+        private long processedSampleCount;
 
         public Recorder(IDspDriver driver)
         {
@@ -38,9 +42,12 @@ namespace Orcbolg.Dsp
             dstCsvPath = null;
             recCsvPath = null;
             csvWriter = null;
+            recordingSampleCount = 0;
             bufferedSampleCount = 0;
-            processedSampleCount = 0;
+            recordedSampleCount = 0;
+
             recordingStartPosition = -1;
+            processedSampleCount = 0;
         }
 
         public void Dispose()
@@ -62,10 +69,10 @@ namespace Orcbolg.Dsp
                 Process(context, recordingStartCommand);
             }
 
-            var recordingStopCommand = command as RecordingStopCommand;
-            if (recordingStopCommand != null)
+            var recordingAbortCommand = command as RecordingAbortCommand;
+            if (recordingAbortCommand != null)
             {
-                Process(context, recordingStopCommand);
+                Process(context, recordingAbortCommand);
             }
 
             var intervalCommand = command as IntervalCommand;
@@ -90,6 +97,7 @@ namespace Orcbolg.Dsp
         private void Process(IDspContext context, RecordingStartCommand command)
         {
             EndWriting();
+
             dstWavPath = command.Path;
             recWavPath = AddSuffix(dstWavPath, recordingSuffix);
             wavWriter = new WaveFileWriter(recWavPath, format);
@@ -97,12 +105,15 @@ namespace Orcbolg.Dsp
             recCsvPath = AddSuffix(dstCsvPath, recordingSuffix);
             csvWriter = new StreamWriter(recCsvPath);
             csvWriter.WriteLine("Position,Message");
+            recordingSampleCount = command.SampleCount;
             bufferedSampleCount = 0;
-            processedSampleCount = 0;
+            recordedSampleCount = 0;
+
             recordingStartPosition = -1;
+            processedSampleCount = 0;
         }
 
-        private void Process(IDspContext context, RecordingStopCommand command)
+        private void Process(IDspContext context, RecordingAbortCommand command)
         {
             EndWriting();
         }
@@ -143,12 +154,23 @@ namespace Orcbolg.Dsp
                                 wavWriter.Write(buffer, 0, buffer.Length);
                                 bufferedSampleCount = 0;
                             }
+                            recordedSampleCount++;
+                            if (recordedSampleCount == recordingSampleCount)
+                            {
+                                context.Post(new RecordingStopCommand());
+                                if (bufferedSampleCount > 0)
+                                {
+                                    wavWriter.Write(buffer, 0, format.BlockAlign * bufferedSampleCount);
+                                }
+                                EndWriting();
+                                break;
+                            }
                         }
                     }
                 }
             }
 
-            processedSampleCount += command.Length;
+            Interlocked.Add(ref processedSampleCount, command.Length);
         }
 
         private void Process(IDspContext context, KeyDownCommand command)
@@ -189,7 +211,10 @@ namespace Orcbolg.Dsp
                 dstCsvPath = null;
                 recCsvPath = null;
             }
+            recordingSampleCount = 0;
             bufferedSampleCount = 0;
+            recordedSampleCount = 0;
+
             processedSampleCount = 0;
             recordingStartPosition = -1;
         }
@@ -201,45 +226,63 @@ namespace Orcbolg.Dsp
             var extension = Path.GetExtension(path);
             return Path.Combine(directory, fileName + suffix + extension);
         }
+
+        public long ProcessedSampleCount
+        {
+            get
+            {
+                return Interlocked.Read(ref processedSampleCount);
+            }
+        }
     }
 
     public sealed class RecordingStartCommand : IDspCommand
     {
         private int number;
         private string path;
+        private long sampleCount;
 
-        public RecordingStartCommand(int number, string path)
+        public RecordingStartCommand(int number, string path, long sampleCount)
         {
             this.number = number;
             this.path = path;
+            this.sampleCount = sampleCount;
         }
 
         public int Number => number;
         public string Path => path;
+        public long SampleCount => sampleCount;
     }
 
     public sealed class RecordingStopCommand : IDspCommand
     {
-        private int number;
-
-        public RecordingStopCommand(int number)
+        public RecordingStopCommand()
         {
-            this.number = number;
         }
+    }
 
-        public int Number => number;
+    public sealed class RecordingAbortCommand : IDspCommand
+    {
+        public RecordingAbortCommand()
+        {
+        }
     }
 
     public static class RecorderEx
     {
         public static void StartRecording(this IDspContext context, int number, string path)
         {
-            context.Post(new RecordingStartCommand(number, path));
+            context.Post(new RecordingStartCommand(number, path, long.MaxValue));
         }
 
-        public static void StopRecording(this IDspContext context, int number)
+        public static void StartRecording(this IDspContext context, int number, string path, long sampleCount)
         {
-            context.Post(new RecordingStopCommand(number));
+            context.Post(new RecordingStartCommand(number, path, sampleCount));
+        }
+
+        public static void AbortRecording(this IDspContext context)
+        {
+            context.Post(new RecordingAbortCommand());
         }
     }
 }

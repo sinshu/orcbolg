@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -73,7 +74,9 @@ namespace Orcbolg.Dsp
                         }
                         else
                         {
-                            throw new DspException("Connection to the audio device timed out.");
+                            var e = new DspException("Connection to the audio device timed out.");
+                            e.Data["thrower"] = this;
+                            throw e;
                         }
                     }
                 }
@@ -99,7 +102,14 @@ namespace Orcbolg.Dsp
 
             if (exceptions.Count > 0)
             {
-                throw new AggregateException("Exception was thrown while processing audio.", exceptions);
+                if (exceptions.Count == 1)
+                {
+                    ExceptionDispatchInfo.Capture(exceptions[0]).Throw();
+                }
+                else
+                {
+                    throw new AggregateException("Exceptions were thrown while processing audio.", exceptions);
+                }
             }
         }
 
@@ -193,6 +203,7 @@ namespace Orcbolg.Dsp
                 catch (Exception e)
                 {
                     stopped = true;
+                    e.Data["thrower"] = dsp;
                     context.Stop(e);
                 }
             }
