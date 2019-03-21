@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using NAudio.Wave;
 
@@ -103,7 +104,7 @@ namespace Orcbolg.Dsp
             wavWriter = new WaveFileWriter(recWavPath, format);
             dstCsvPath = Path.ChangeExtension(command.Path, ".csv");
             recCsvPath = AddSuffix(dstCsvPath, recordingSuffix);
-            csvWriter = new StreamWriter(recCsvPath);
+            csvWriter = new StreamWriter(recCsvPath, false, Encoding.Default);
             csvWriter.WriteLine("Position,Message");
             recordingSampleCount = command.SampleCount;
             bufferedSampleCount = 0;
@@ -157,7 +158,7 @@ namespace Orcbolg.Dsp
                             recordedSampleCount++;
                             if (recordedSampleCount == recordingSampleCount)
                             {
-                                context.Post(new RecordingStopCommand());
+                                context.Post(new RecordingCompleteCommand());
                                 if (bufferedSampleCount > 0)
                                 {
                                     wavWriter.Write(buffer, 0, format.BlockAlign * bufferedSampleCount);
@@ -236,6 +237,8 @@ namespace Orcbolg.Dsp
         }
     }
 
+
+
     public sealed class RecordingStartCommand : IDspCommand
     {
         private int number;
@@ -254,12 +257,16 @@ namespace Orcbolg.Dsp
         public long SampleCount => sampleCount;
     }
 
-    public sealed class RecordingStopCommand : IDspCommand
+
+
+    public sealed class RecordingCompleteCommand : IDspCommand
     {
-        public RecordingStopCommand()
+        public RecordingCompleteCommand()
         {
         }
     }
+
+
 
     public sealed class RecordingAbortCommand : IDspCommand
     {
@@ -267,6 +274,8 @@ namespace Orcbolg.Dsp
         {
         }
     }
+
+
 
     public static class RecorderEx
     {

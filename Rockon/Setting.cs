@@ -17,7 +17,8 @@ namespace Rockon
         private readonly string driverName;
         private readonly int sampleRate;
         private readonly int bufferLength;
-        private readonly int updateCycle;
+        private readonly int updateInterval;
+        private readonly int drawCycle;
         private readonly int[] inputChannels;
         private readonly int[] outputChannels;
         private readonly string recordingDirectory;
@@ -34,7 +35,8 @@ namespace Rockon
             driverName = GetString(dic, "driver_name");
             sampleRate = GetInt(dic, "sample_rate_hz");
             bufferLength = sampleRate * GetInt(dic, "buffer_length_sec");
-            updateCycle = GetInt(dic, "update_cycle");
+            updateInterval = GetInt(dic, "update_interval");
+            drawCycle = GetInt(dic, "draw_cycle");
             inputChannels = GetIntList(dic, "input_channels").Select(x => x - 1).ToArray();
             outputChannels = GetIntList(dic, "output_channels").Select(x => x - 1).ToArray();
             recordingDirectory = Path.Combine(defaultDirectory, GetString(dic, "rec_directory"));
@@ -72,7 +74,7 @@ namespace Rockon
             }
             catch (KeyNotFoundException)
             {
-                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(cfgPath) + ")");
+                throw new KeyNotFoundException("設定項目 " + key + " を設定してください。(" + Path.GetFileName(cfgPath) + ")");
             }
             if (int.TryParse(info.Value, out value))
             {
@@ -80,7 +82,7 @@ namespace Rockon
             }
             else
             {
-                throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
+                throw new FormatException("設定項目 " + key + " の値を正しく設定してください。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
             }
         }
 
@@ -93,7 +95,7 @@ namespace Rockon
             }
             catch (KeyNotFoundException)
             {
-                throw new KeyNotFoundException("設定項目 " + key + " がありません。(" + Path.GetFileName(cfgPath) + ")");
+                throw new KeyNotFoundException("設定項目 " + key + " を設定してください。(" + Path.GetFileName(cfgPath) + ")");
             }
             var split = info.Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             var values = new int[split.Length];
@@ -106,7 +108,7 @@ namespace Rockon
                 }
                 else
                 {
-                    throw new FormatException("設定項目 " + key + " の値がおかしいです。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
+                    throw new FormatException("設定項目 " + key + " の値を正しく設定してください。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
                 }
             }
             return values;
@@ -119,7 +121,8 @@ namespace Rockon
             sb.Append(nameof(DriverName)).Append(" = ").Append(DriverName).AppendLine(",");
             sb.Append(nameof(SampleRate)).Append(" = ").Append(SampleRate).AppendLine(",");
             sb.Append(nameof(BufferLength)).Append(" = ").Append(BufferLength).AppendLine(",");
-            sb.Append(nameof(UpdateCycle)).Append(" = ").Append(UpdateCycle).AppendLine(",");
+            sb.Append(nameof(UpdateInterval)).Append(" = ").Append(UpdateInterval).AppendLine(",");
+            sb.Append(nameof(DrawCycle)).Append(" = ").Append(DrawCycle).AppendLine(",");
             sb.Append(nameof(InputChannels)).Append(" = { ").Append(string.Join(", ", InputChannels)).AppendLine(" },");
             sb.Append(nameof(OutputChannels)).Append(" = { ").Append(string.Join(", ", OutputChannels)).AppendLine(" },");
             sb.Append(nameof(RecordingDirectory)).Append(" = ").Append(RecordingDirectory).AppendLine();
@@ -158,11 +161,19 @@ namespace Rockon
             }
         }
 
-        public int UpdateCycle
+        public int UpdateInterval
         {
             get
             {
-                return updateCycle;
+                return updateInterval;
+            }
+        }
+
+        public int DrawCycle
+        {
+            get
+            {
+                return drawCycle;
             }
         }
 

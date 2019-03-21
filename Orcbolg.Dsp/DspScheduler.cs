@@ -75,7 +75,7 @@ namespace Orcbolg.Dsp
                         else
                         {
                             var e = new DspException("Connection to the audio device timed out.");
-                            e.Data["thrower"] = this;
+                            e.Data["thrower"] = GetType().Name;
                             throw e;
                         }
                     }
@@ -203,7 +203,7 @@ namespace Orcbolg.Dsp
                 catch (Exception e)
                 {
                     stopped = true;
-                    e.Data["thrower"] = dsp;
+                    e.Data["thrower"] = dsp.GetType().Name;
                     context.Stop(e);
                 }
             }
@@ -220,6 +220,15 @@ namespace Orcbolg.Dsp
                     return actionBlock.Completion;
                 }
             }
+        }
+
+
+
+        private enum DspState
+        {
+            Initialized = 1,
+            Running = 2,
+            Stop = 3
         }
     }
 }

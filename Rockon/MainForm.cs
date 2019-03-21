@@ -42,11 +42,28 @@ namespace Rockon
                 FormHelper.SetFormResizeAction(this, MonitorResize);
                 FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
                 recordingState = new RecordingState(this);
-                await dspComponent.DspContext.Completion;
+                var meter = new LoadMeter(picLoadInfo, 3, null);
+
+                try
+                {
+                    await dspComponent.DspContext.Completion;
+                }
+                catch (Exception exception)
+                {
+                    using (var box = new ErrorBox("アプリは中断されました。", exception))
+                    {
+                        box.ShowDialog();
+                    }
+                    Close();
+                }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                MessageBox.Show(ex.ToString());
+                using (var box = new ErrorBox("アプリを起動できませんでした。", exception))
+                {
+                    box.ShowDialog();
+                }
+                Close();
             }
         }
 
@@ -85,7 +102,7 @@ namespace Rockon
                     recordingState?.DownChannelFocus();
                     break;
                 default:
-                    dspComponent?.DspContext.OnKeyDown(e.KeyCode.ToString());
+                    dspComponent?.DspContext.SendKeyDownEvent(e.KeyCode.ToString());
                     break;
             }
             e.Handled = true;
@@ -136,7 +153,7 @@ namespace Rockon
                     dspDriver = new AsioDspDriver(asioDspSetting);
                     bypass = new Bypass(dspDriver);
                     dspDriver.AddDsp(bypass);
-                    waveformMonitor = new WaveformMonitor(dspDriver, form.picWaveformMonitor, setting.UpdateCycle, false);
+                    waveformMonitor = new WaveformMonitor(dspDriver, form.picWaveformMonitor, setting.UpdateInterval, setting.DrawCycle, false);
                     dspDriver.AddDsp(waveformMonitor);
                     recorder = new Recorder(dspDriver);
                     dspDriver.AddDsp(recorder);
@@ -144,6 +161,7 @@ namespace Rockon
                     dspDriver.AddDsp(watchdog);
                     commandPicker = new CommandPicker(form);
                     dspDriver.AddDsp(commandPicker);
+                    //dspDriver.AddDsp(new ExceptionTest());
 
                     dspContext = dspDriver.Run();
                 }
@@ -339,7 +357,7 @@ namespace Rockon
                 }
             }
 
-            public void OnRecordingStop()
+            public void RecordingComplete()
             {
                 if (recording)
                 {
@@ -394,16 +412,16 @@ namespace Rockon
 
             public void Process(IDspContext context, IDspCommand command)
             {
-                var recordingStopCommand = command as RecordingStopCommand;
-                if (recordingStopCommand != null)
+                var recordingCompleteCommand = command as RecordingCompleteCommand;
+                if (recordingCompleteCommand != null)
                 {
-                    Process(context, recordingStopCommand);
+                    Process(context, recordingCompleteCommand);
                 }
             }
 
-            public void Process(IDspContext context, RecordingStopCommand command)
+            public void Process(IDspContext context, RecordingCompleteCommand command)
             {
-                form.Invoke((MethodInvoker)(() => form.recordingState.OnRecordingStop()));
+                form.Invoke((MethodInvoker)(() => form.recordingState.RecordingComplete()));
             }
         }
     }

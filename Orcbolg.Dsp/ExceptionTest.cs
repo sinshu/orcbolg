@@ -16,14 +16,12 @@ namespace Orcbolg.Dsp
 
         public void Process(IDspContext context, IDspCommand command)
         {
-            System.Threading.Thread.Sleep(10);
-
             //System.Threading.Thread.Sleep(300);
             count++;
 
             if (count == 100)
             {
-                //throw new Exception("おわああ");
+                throw new Exception("おわああ");
             }
 
             var interval = command as IntervalCommand;

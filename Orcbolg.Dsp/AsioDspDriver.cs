@@ -334,7 +334,7 @@ namespace Orcbolg.Dsp
                     {
                         stopped = true;
                         var e = new DspException("Buffer length is not sufficient.");
-                        e.Data["thrower"] = this;
+                        e.Data["thrower"] = GetType().Name;
                         throw e;
                     }
                     entry.Position = processedSampleCount;
@@ -412,6 +412,16 @@ namespace Orcbolg.Dsp
                     return completion;
                 }
             }
+        }
+
+
+
+        private enum DspState
+        {
+            Initialized = 1,
+            Running = 2,
+            Stop = 3,
+            Disposed = 4
         }
     }
 }

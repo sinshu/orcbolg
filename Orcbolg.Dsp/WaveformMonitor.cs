@@ -11,7 +11,8 @@ namespace Orcbolg.Dsp
     public sealed class WaveformMonitor : INonrealtimeDsp, IDisposable
     {
         private readonly PictureBox pictureBox;
-        private readonly int updateCycle;
+        private readonly int updateInterval;
+        private readonly int drawCycle;
         private readonly bool showOutput;
 
         private readonly int channelCount;
@@ -46,15 +47,17 @@ namespace Orcbolg.Dsp
         private Graphics ui_g;
         private int ui_x;
         private int ui_sampleCount;
+        private int ui_drawCycleCount;
 
         private long processedSampleCount;
 
-        public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateCycle, bool showOutput)
+        public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateInterval, int drawCycle, bool showOutput)
         {
             try
             {
                 this.pictureBox = pictureBox;
-                this.updateCycle = updateCycle;
+                this.updateInterval = updateInterval;
+                this.drawCycle = drawCycle;
                 this.showOutput = showOutput;
 
                 channelCount = showOutput ? driver.InputChannelCount + driver.OutputChannelCount : driver.InputChannelCount;
@@ -179,6 +182,8 @@ namespace Orcbolg.Dsp
             ui_g.Clear(SystemColors.ControlDarkDark);
             ui_x = 0;
             ui_sampleCount = 0;
+            ui_drawCycleCount = 0;
+            pictureBox.Refresh();
         }
 
         public void Resize()
@@ -205,10 +210,10 @@ namespace Orcbolg.Dsp
                 Process(context, recordingStartCommand);
             }
 
-            var recordingStopCommand = command as RecordingStopCommand;
-            if (recordingStopCommand != null)
+            var recordingCompleteCommand = command as RecordingCompleteCommand;
+            if (recordingCompleteCommand != null)
             {
-                Process(context, recordingStopCommand);
+                Process(context, recordingCompleteCommand);
             }
 
             var recordingAbortCommand = command as RecordingAbortCommand;
@@ -269,7 +274,7 @@ namespace Orcbolg.Dsp
                     }
                 }
                 bg_sampleCount++;
-                if (bg_sampleCount == updateCycle)
+                if (bg_sampleCount == updateInterval)
                 {
                     pictureBox.Invoke((MethodInvoker)UpdateBuffer);
                     ResetSignalStats();
@@ -286,7 +291,7 @@ namespace Orcbolg.Dsp
             messages.Add(Tuple.Create("REC" + Environment.NewLine + "[" + command.Number + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
-        private void Process(IDspContext context, RecordingStopCommand command)
+        private void Process(IDspContext context, RecordingCompleteCommand command)
         {
             recording = false;
             messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + recordingNumber + "]", Color.FromArgb(240, 244, 67, 54)));
@@ -351,7 +356,7 @@ namespace Orcbolg.Dsp
                 ui_g.FillRectangle(gridColor, ui_x, bottom - 1, 1, 1);
             }
 
-            ui_sampleCount += updateCycle;
+            ui_sampleCount += updateInterval;
             if (ui_sampleCount >= sampleRate)
             {
                 ui_g.FillRectangle(gridColor, ui_x, 0, 1, ui_buffer.Height);
@@ -383,7 +388,13 @@ namespace Orcbolg.Dsp
             {
                 ui_x = 0;
             }
-            pictureBox.Refresh();
+
+            ui_drawCycleCount++;
+            if (ui_drawCycleCount == drawCycle)
+            {
+                pictureBox.Refresh();
+                ui_drawCycleCount = 0;
+            }
         }
 
         private void Process(IDspContext context, KeyDownCommand command)

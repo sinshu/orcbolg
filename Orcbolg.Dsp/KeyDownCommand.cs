@@ -22,9 +22,11 @@ namespace Orcbolg.Dsp
         }
     }
 
+
+
     public static class KeyDownCommandEx
     {
-        public static void OnKeyDown(this IDspContext context, string value)
+        public static void SendKeyDownEvent(this IDspContext context, string value)
         {
             context.Post(new KeyDownCommand(value));
         }
