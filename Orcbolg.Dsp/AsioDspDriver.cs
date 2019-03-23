@@ -339,7 +339,6 @@ namespace Orcbolg.Dsp
                     }
                     entry.Position = processedSampleCount;
                     entry.DspStartTime = stopwatch.Elapsed;
-                    entry.GlobalTime = DateTime.Now;
 
                     for (var ch = 0; ch < driver.asioInputChannelIndices.Length; ch++)
                     {

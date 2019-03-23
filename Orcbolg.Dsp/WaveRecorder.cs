@@ -8,7 +8,7 @@ using NAudio.Wave;
 
 namespace Orcbolg.Dsp
 {
-    public sealed class Recorder : INonrealtimeDsp, IDisposable
+    public sealed class WaveRecorder : INonrealtimeDsp, IDisposable
     {
         private static readonly string recordingSuffix = "_recording";
 
@@ -30,7 +30,7 @@ namespace Orcbolg.Dsp
         private long recordingStartPosition;
         private long processedSampleCount;
 
-        public Recorder(IDspDriver driver)
+        public WaveRecorder(IDspDriver driver)
         {
             channelCount = driver.InputChannelCount;
             bufferLength = driver.SampleRate / 10;

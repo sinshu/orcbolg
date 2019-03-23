@@ -17,7 +17,6 @@ namespace Orcbolg.Dsp
         private long position;
         private TimeSpan dspStartTime;
         private TimeSpan dspEndTime;
-        private DateTime globalTime;
 
         public DspBufferEntry(int inputChannelCount, int outputChannelCount, int intervalLength)
         {
@@ -116,19 +115,6 @@ namespace Orcbolg.Dsp
             set
             {
                 dspEndTime = value;
-            }
-        }
-
-        public DateTime GlobalTime
-        {
-            get
-            {
-                return globalTime;
-            }
-
-            set
-            {
-                globalTime = value;
             }
         }
     }

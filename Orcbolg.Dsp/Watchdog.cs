@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NAudio.Wave;
 
 namespace Orcbolg.Dsp
@@ -10,11 +11,20 @@ namespace Orcbolg.Dsp
         private TimeSpan threshold;
         private TimeSpan previous;
 
+        private object mutex;
+        private double weight;
+        private double dspTime;
+
         public Watchdog(IDspDriver driver)
         {
             var value = 1.5 * driver.IntervalLength / driver.SampleRate;
             threshold = TimeSpan.FromSeconds(value);
             previous = TimeSpan.FromDays(1);
+
+            mutex = new object();
+            weight = Math.Pow(10, -3 / ((double)driver.SampleRate / driver.IntervalLength));
+            Console.WriteLine(weight);
+            dspTime = 0;
         }
 
         public void Process(IDspContext context, IDspCommand command)
@@ -35,6 +45,24 @@ namespace Orcbolg.Dsp
                 context.Post(new JumpingWarningCommand(command.Position));
             }
             previous = current;
+
+
+            var newDspTime = (1 - weight) * dspTime + weight * (command.DspBufferEntry.DspEndTime - command.DspBufferEntry.DspStartTime).TotalSeconds;
+            lock (mutex)
+            {
+                dspTime = newDspTime;
+            }
+        }
+
+        public double DspTime
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    return dspTime;
+                }
+            }
         }
     }
 

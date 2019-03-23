@@ -82,12 +82,12 @@
             // txtDebugInfo
             // 
             this.txtDebugInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtDebugInfo.Location = new System.Drawing.Point(320, 8);
+            this.txtDebugInfo.Location = new System.Drawing.Point(328, 8);
             this.txtDebugInfo.Multiline = true;
             this.txtDebugInfo.Name = "txtDebugInfo";
             this.txtDebugInfo.ReadOnly = true;
             this.txtDebugInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDebugInfo.Size = new System.Drawing.Size(472, 64);
+            this.txtDebugInfo.Size = new System.Drawing.Size(464, 64);
             this.txtDebugInfo.TabIndex = 6;
             // 
             // picLoadInfo
@@ -138,7 +138,7 @@
             this.pnlBottomLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlBottomLeft.Location = new System.Drawing.Point(8, 8);
             this.pnlBottomLeft.Name = "pnlBottomLeft";
-            this.pnlBottomLeft.Size = new System.Drawing.Size(312, 64);
+            this.pnlBottomLeft.Size = new System.Drawing.Size(320, 64);
             this.pnlBottomLeft.TabIndex = 5;
             // 
             // MainForm

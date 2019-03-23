@@ -42,7 +42,7 @@ namespace Rockon
                 FormHelper.SetFormResizeAction(this, MonitorResize);
                 FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
                 recordingState = new RecordingState(this);
-                var meter = new LoadMeter(picLoadInfo, 3, null);
+                var meter = CreateLoadMeter(this, picLoadInfo, dspComponent);
 
                 try
                 {
@@ -65,6 +65,31 @@ namespace Rockon
                 }
                 Close();
             }
+        }
+
+        private static LoadMeter CreateLoadMeter(Form form, PictureBox pictureBox, DspComponent dspComponent)
+        {
+            var names = new string[]
+            {
+                "DSP",
+                "描画",
+                "録音"
+            };
+
+            var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
+            var bufferLength = Math.Min(dspComponent.AsioDspSetting.BufferLength, dspComponent.DspDriver.SampleRate);
+            var dspContext = dspComponent.DspContext;
+            var waveformMonitor = dspComponent.WaveformMonitor;
+            var waveRecorder = dspComponent.WaveRecorder;
+
+            var sources = new Func<double>[]
+            {
+                () => dspComponent.Watchdog.DspTime / intervalTime,
+                () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
+                () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
+            };
+
+            return new LoadMeter(form, pictureBox, names, sources);
         }
 
         private void btnRecordingStartStop_Click(object sender, EventArgs e)
@@ -131,7 +156,7 @@ namespace Rockon
             private IDspDriver dspDriver;
             private Bypass bypass;
             private WaveformMonitor waveformMonitor;
-            private Recorder recorder;
+            private WaveRecorder waveRecorder;
             private Watchdog watchdog;
             private CommandPicker commandPicker;
             private IDspContext dspContext;
@@ -151,17 +176,21 @@ namespace Rockon
                     }
 
                     dspDriver = new AsioDspDriver(asioDspSetting);
+
                     bypass = new Bypass(dspDriver);
                     dspDriver.AddDsp(bypass);
+
                     waveformMonitor = new WaveformMonitor(dspDriver, form.picWaveformMonitor, setting.UpdateInterval, setting.DrawCycle, false);
                     dspDriver.AddDsp(waveformMonitor);
-                    recorder = new Recorder(dspDriver);
-                    dspDriver.AddDsp(recorder);
+
+                    waveRecorder = new WaveRecorder(dspDriver);
+                    dspDriver.AddDsp(waveRecorder);
+
                     watchdog = new Watchdog(dspDriver);
                     dspDriver.AddDsp(watchdog);
+
                     commandPicker = new CommandPicker(form);
                     dspDriver.AddDsp(commandPicker);
-                    //dspDriver.AddDsp(new ExceptionTest());
 
                     dspContext = dspDriver.Run();
                 }
@@ -186,10 +215,10 @@ namespace Rockon
 
             public void Dispose()
             {
-                if (recorder != null)
+                if (waveRecorder != null)
                 {
-                    recorder.Dispose();
-                    recorder = null;
+                    waveRecorder.Dispose();
+                    waveRecorder = null;
                 }
                 if (waveformMonitor != null)
                 {
@@ -240,11 +269,27 @@ namespace Rockon
                 }
             }
 
+            public WaveRecorder WaveRecorder
+            {
+                get
+                {
+                    return waveRecorder;
+                }
+            }
+
             public Watchdog Watchdog
             {
                 get
                 {
                     return watchdog;
+                }
+            }
+
+            public CommandPicker CommandPicker
+            {
+                get
+                {
+                    return commandPicker;
                 }
             }
 
