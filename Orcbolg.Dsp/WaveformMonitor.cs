@@ -53,6 +53,11 @@ namespace Orcbolg.Dsp
 
         public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateInterval, int drawCycle, bool showOutput)
         {
+            if ((double)updateInterval / driver.SampleRate < 0.001)
+            {
+                throw new ArgumentException("Update interval must be greater than or equal to 1 ms.");
+            }
+
             try
             {
                 this.pictureBox = pictureBox;
@@ -259,7 +264,7 @@ namespace Orcbolg.Dsp
                 {
                     for (var ch = 0; ch < command.OutputInterval.Length; ch++)
                     {
-                        var sample = command.InputInterval[ch][t];
+                        var sample = command.OutputInterval[ch][t];
                         if (sample < bg_min[i])
                         {
                             bg_min[i] = sample;
@@ -276,7 +281,7 @@ namespace Orcbolg.Dsp
                 bg_sampleCount++;
                 if (bg_sampleCount == updateInterval)
                 {
-                    pictureBox.Invoke((MethodInvoker)UpdateBuffer);
+                    pictureBox.Invoke((MethodInvoker)(() => UpdateBuffer(context)));
                     ResetSignalStats();
                 }
             }
@@ -303,7 +308,7 @@ namespace Orcbolg.Dsp
             messages.Add(Tuple.Create("STOP" + Environment.NewLine + "[" + recordingNumber + "]", Color.FromArgb(240, 244, 67, 54)));
         }
 
-        private void UpdateBuffer()
+        private void UpdateBuffer(IDspContext context)
         {
             ui_g.FillRectangle(backgroundColor, ui_x, 0, 1, ui_buffer.Height);
 
@@ -392,7 +397,10 @@ namespace Orcbolg.Dsp
             ui_drawCycleCount++;
             if (ui_drawCycleCount == drawCycle)
             {
-                pictureBox.Refresh();
+                if (context.ProcessedSampleCount - processedSampleCount < sampleRate / 2)
+                {
+                    pictureBox.Refresh();
+                }
                 ui_drawCycleCount = 0;
             }
         }

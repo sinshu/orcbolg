@@ -60,9 +60,11 @@
     <Compile Include="IDspContext.cs" />
     <Compile Include="IDspDriver.cs" />
     <Compile Include="INonrealtimeDsp.cs" />
+    <Compile Include="InputGain.cs" />
     <Compile Include="IntervalCommand.cs" />
     <Compile Include="IRealtimeDsp.cs" />
     <Compile Include="KeyDownCommand.cs" />
+    <Compile Include="OutputGain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WaveRecorder.cs" />
     <Compile Include="StopCommand.cs" />

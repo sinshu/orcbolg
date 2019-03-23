@@ -21,6 +21,8 @@ namespace Rockon
         private readonly int drawCycle;
         private readonly int[] inputChannels;
         private readonly int[] outputChannels;
+        private readonly float[] inputGains;
+        private readonly float[] outputGains;
         private readonly string recordingDirectory;
 
         public Setting() : this(Path.Combine(defaultDirectory, defaultCfgName))
@@ -38,8 +40,27 @@ namespace Rockon
             updateInterval = GetInt(dic, "update_interval");
             drawCycle = GetInt(dic, "draw_cycle");
             inputChannels = GetIntList(dic, "input_channels").Select(x => x - 1).ToArray();
+            inputGains = GetFloatList(dic, "input_gains").ToArray();
             outputChannels = GetIntList(dic, "output_channels").Select(x => x - 1).ToArray();
+            outputGains = GetFloatList(dic, "output_gains").ToArray();
             recordingDirectory = Path.Combine(defaultDirectory, GetString(dic, "rec_directory"));
+
+            if (inputGains.Length == 1)
+            {
+                inputGains = Enumerable.Repeat(inputGains[0], inputChannels.Length).ToArray();
+            }
+            else if (inputGains.Length != inputChannels.Length)
+            {
+                throw new Exception("input_gain に指定する値の個数は 1 または input_channel に指定された値の個数に一致する必要があります。");
+            }
+            if (outputGains.Length == 1)
+            {
+                outputGains = Enumerable.Repeat(outputGains[0], outputChannels.Length).ToArray();
+            }
+            else if (outputGains.Length != outputChannels.Length)
+            {
+                throw new Exception("output_gain に指定する値の個数は 1 または output_channel に指定された値の個数に一致する必要があります。");
+            }
         }
 
         private static Dictionary<string, LineInfo> Read(string path)
@@ -114,6 +135,34 @@ namespace Rockon
             return values;
         }
 
+        private float[] GetFloatList(Dictionary<string, LineInfo> dic, string key)
+        {
+            LineInfo info;
+            try
+            {
+                info = dic[key];
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new KeyNotFoundException("設定項目 " + key + " を設定してください。(" + Path.GetFileName(cfgPath) + ")");
+            }
+            var split = info.Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            var values = new float[split.Length];
+            for (var i = 0; i < split.Length; i++)
+            {
+                float value;
+                if (float.TryParse(split[i], out value))
+                {
+                    values[i] = value;
+                }
+                else
+                {
+                    throw new FormatException("設定項目 " + key + " の値を正しく設定してください。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
+                }
+            }
+            return values;
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -124,7 +173,9 @@ namespace Rockon
             sb.Append(nameof(UpdateInterval)).Append(" = ").Append(UpdateInterval).AppendLine(",");
             sb.Append(nameof(DrawCycle)).Append(" = ").Append(DrawCycle).AppendLine(",");
             sb.Append(nameof(InputChannels)).Append(" = { ").Append(string.Join(", ", InputChannels)).AppendLine(" },");
+            sb.Append(nameof(InputGains)).Append(" = { ").Append(string.Join(", ", InputGains)).AppendLine(" },");
             sb.Append(nameof(OutputChannels)).Append(" = { ").Append(string.Join(", ", OutputChannels)).AppendLine(" },");
+            sb.Append(nameof(OutputGains)).Append(" = { ").Append(string.Join(", ", OutputGains)).AppendLine(" },");
             sb.Append(nameof(RecordingDirectory)).Append(" = ").Append(RecordingDirectory).AppendLine();
             return sb.ToString();
         }
@@ -185,11 +236,27 @@ namespace Rockon
             }
         }
 
+        public IReadOnlyList<float> InputGains
+        {
+            get
+            {
+                return inputGains;
+            }
+        }
+
         public IReadOnlyList<int> OutputChannels
         {
             get
             {
                 return outputChannels;
+            }
+        }
+
+        public IReadOnlyList<float> OutputGains
+        {
+            get
+            {
+                return outputGains;
             }
         }
 

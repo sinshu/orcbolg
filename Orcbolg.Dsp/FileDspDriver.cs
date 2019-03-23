@@ -10,9 +10,8 @@ namespace Orcbolg.Dsp
     public sealed class FileDspDriver : IDspDriver
     {
         private readonly string inputFileName;
-        private readonly int intervalLength;
         private readonly string outputFileName;
-        private readonly int outputChannelCount;
+        private readonly int intervalLength;
 
         private readonly List<IRealtimeDsp> realtimeDsps;
         private readonly List<INonrealtimeDsp> nonrealtimeDsps;
@@ -22,42 +21,59 @@ namespace Orcbolg.Dsp
         private WaveFileWriter writer;
         private byte[] writeBuffer;
 
-        private readonly DspBufferEntry entry;
+        private readonly int inputChannelCount;
+        private readonly int outputChannelCount;
 
         public FileDspDriver(string inputFileName, int intervalLength)
         {
-            this.inputFileName = inputFileName;
-            this.intervalLength = intervalLength;
-            outputFileName = null;
-            outputChannelCount = 0;
+            try
+            {
+                this.inputFileName = inputFileName;
+                this.outputFileName = null;
+                this.intervalLength = intervalLength;
 
-            realtimeDsps = new List<IRealtimeDsp>();
-            nonrealtimeDsps = new List<INonrealtimeDsp>();
+                realtimeDsps = new List<IRealtimeDsp>();
+                nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-            reader = new WaveFileReader(inputFileName);
-            readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
-            writer = null;
-            writeBuffer = null;
+                reader = new WaveFileReader(inputFileName);
+                readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
+                writer = null;
+                writeBuffer = null;
 
-            entry = new DspBufferEntry(reader.WaveFormat.Channels, 0, intervalLength);
+                this.inputChannelCount = reader.WaveFormat.Channels;
+                this.outputChannelCount = 0;
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
-        public FileDspDriver(string inputFileName, int intervalLength, string outputFileName, int outputChannelCount)
+        public FileDspDriver(string inputFileName, string outputFileName, int outputChannelCount, int intervalLength)
         {
-            this.inputFileName = inputFileName;
-            this.intervalLength = intervalLength;
-            this.outputFileName = outputFileName;
-            this.outputChannelCount = outputChannelCount;
+            try
+            {
+                this.inputFileName = inputFileName;
+                this.outputFileName = outputFileName;
+                this.intervalLength = intervalLength;
 
-            realtimeDsps = new List<IRealtimeDsp>();
-            nonrealtimeDsps = new List<INonrealtimeDsp>();
+                realtimeDsps = new List<IRealtimeDsp>();
+                nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-            reader = new WaveFileReader(inputFileName);
-            readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
-            writer = new WaveFileWriter(outputFileName, new WaveFormat(reader.WaveFormat.SampleRate, 16, outputChannelCount));
-            writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
+                reader = new WaveFileReader(inputFileName);
+                readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
+                writer = new WaveFileWriter(outputFileName, new WaveFormat(reader.WaveFormat.SampleRate, 16, outputChannelCount));
+                writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
 
-            entry = new DspBufferEntry(reader.WaveFormat.Channels, outputChannelCount, intervalLength);
+                this.inputChannelCount = reader.WaveFormat.Channels;
+                this.outputChannelCount = outputChannelCount;
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
         public void AddDsp(IRealtimeDsp dsp)
@@ -120,7 +136,7 @@ namespace Orcbolg.Dsp
         {
             get
             {
-                return reader.WaveFormat.Channels;
+                return inputChannelCount;
             }
         }
 
@@ -146,6 +162,9 @@ namespace Orcbolg.Dsp
         {
             private readonly FileDspDriver driver;
 
+            private DspBufferEntry entry;
+            private List<IDspCommand> commandOutputBuffer;
+            private List<IDspCommand> commandInputBuffer;
             private long processedSampleCount;
 
             private Task completion;
@@ -154,6 +173,9 @@ namespace Orcbolg.Dsp
             {
                 this.driver = driver;
 
+                entry = new DspBufferEntry(driver.inputChannelCount, driver.outputChannelCount, driver.intervalLength);
+                commandOutputBuffer = new List<IDspCommand>();
+                commandInputBuffer = new List<IDspCommand>();
                 processedSampleCount = 0;
 
                 completion = Task.Run((Action)Run);
@@ -170,21 +192,35 @@ namespace Orcbolg.Dsp
                         return;
                     }
 
-                    DspHelper.ReadInt16(driver.readBuffer, driver.entry.InputInterval, sampleCount);
-                    var command = new IntervalCommand(driver.entry, sampleCount);
-
+                    DspHelper.ReadInt16(driver.readBuffer, entry.InputInterval, sampleCount);
                     foreach (var dsp in driver.realtimeDsps)
                     {
-                        dsp.Process(command.InputInterval, command.OutputInterval, sampleCount);
+                        dsp.Process(entry.InputInterval, entry.OutputInterval, sampleCount);
                     }
-
                     if (driver.writer != null)
                     {
-                        DspHelper.WriteInt16(command.OutputInterval, driver.writeBuffer, sampleCount);
+                        DspHelper.WriteInt16(entry.OutputInterval, driver.writeBuffer, sampleCount);
                         driver.writer.Write(driver.writeBuffer, 0, driver.writer.WaveFormat.BlockAlign * sampleCount);
                     }
 
-                    Post(command);
+                    var intervalCommand = new IntervalCommand(entry, sampleCount);
+                    Post(intervalCommand);
+                    while (commandOutputBuffer.Count > 0)
+                    {
+                        commandInputBuffer.AddRange(commandOutputBuffer);
+                        commandOutputBuffer.Clear();
+                        foreach (var command in commandInputBuffer)
+                        {
+                            foreach (var dsp in driver.nonrealtimeDsps)
+                            {
+                                dsp.Process(this, command);
+                            }
+                        }
+                        commandInputBuffer.Clear();
+                    }
+
+                    processedSampleCount += sampleCount;
+
                     if (sampleCount < driver.intervalLength)
                     {
                         return;
@@ -194,16 +230,7 @@ namespace Orcbolg.Dsp
 
             public void Post(IDspCommand command)
             {
-                foreach (var dsp in driver.nonrealtimeDsps)
-                {
-                    dsp.Process(this, command);
-                }
-
-                var intervalCommand = command as IntervalCommand;
-                if (intervalCommand != null)
-                {
-                    processedSampleCount += intervalCommand.Length;
-                }
+                commandOutputBuffer.Add(command);
             }
 
             public long ProcessedSampleCount

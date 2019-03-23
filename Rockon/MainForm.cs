@@ -169,7 +169,9 @@ namespace Rockon
         {
             private AsioDspSetting asioDspSetting;
             private IDspDriver dspDriver;
+            private InputGain inputGain;
             private Bypass bypass;
+            private OutputGain outputGain;
             private WaveformMonitor waveformMonitor;
             private WaveRecorder waveRecorder;
             private Watchdog watchdog;
@@ -192,9 +194,17 @@ namespace Rockon
                     //asioDspSetting.UseLongInterval = false;
 
                     dspDriver = new AsioDspDriver(asioDspSetting);
+                    //dspDriver = new FileDspDriver("test.wav",  2345);
+                    //dspDriver = new FileDspDriver("test.wav", "out.wav", 2, 2345);
+
+                    inputGain = new InputGain(dspDriver, setting.InputGains);
+                    dspDriver.AddDsp(inputGain);
 
                     bypass = new Bypass(dspDriver);
                     dspDriver.AddDsp(bypass);
+
+                    outputGain = new OutputGain(dspDriver, setting.OutputGains);
+                    dspDriver.AddDsp(outputGain);
 
                     waveformMonitor = new WaveformMonitor(dspDriver, form.picWaveformMonitor, setting.UpdateInterval, setting.DrawCycle, false);
                     dspDriver.AddDsp(waveformMonitor);
@@ -455,6 +465,10 @@ namespace Rockon
                 if (form.dspComponent.DspDriver.OutputChannelCount > 0)
                 {
                     channelFocus = Math.Max(channelFocus - 1, 0);
+                    for (var ch = 0; ch < form.dspComponent.DspDriver.OutputChannelCount; ch++)
+                    {
+                        form.dspComponent.Bypass.SetConnection(channelFocus, ch);
+                    }
                     form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
                     form.picWaveformMonitor.Refresh();
                 }
@@ -465,6 +479,10 @@ namespace Rockon
                 if (form.dspComponent.DspDriver.OutputChannelCount > 0)
                 {
                     channelFocus = Math.Min(channelFocus + 1, form.dspComponent.DspDriver.InputChannelCount - 1);
+                    for (var ch = 0; ch < form.dspComponent.DspDriver.OutputChannelCount; ch++)
+                    {
+                        form.dspComponent.Bypass.SetConnection(channelFocus, ch);
+                    }
                     form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
                     form.picWaveformMonitor.Refresh();
                 }
