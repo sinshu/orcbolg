@@ -17,13 +17,12 @@ namespace Orcbolg.Dsp
 
         public Watchdog(IDspDriver driver)
         {
-            var value = 1.5 * driver.IntervalLength / driver.SampleRate;
+            var value = Math.Max(1.5 * driver.IntervalLength / driver.SampleRate, 0.01);
             threshold = TimeSpan.FromSeconds(value);
             previous = TimeSpan.FromDays(1);
 
             mutex = new object();
             weight = Math.Pow(10, -3 / ((double)driver.SampleRate / driver.IntervalLength));
-            Console.WriteLine(weight);
             dspTime = 0;
         }
 

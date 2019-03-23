@@ -17,6 +17,7 @@ namespace Rockon
 
         private Setting setting;
         private DspComponent dspComponent;
+        private LoadMeter loadMeter;
         private RecordingState recordingState;
 
         public MainForm()
@@ -41,8 +42,9 @@ namespace Rockon
                 dspComponent = new DspComponent(setting, this);
                 FormHelper.SetFormResizeAction(this, MonitorResize);
                 FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
+                loadMeter = CreateLoadMeter(this, picLoadInfo, dspComponent);
                 recordingState = new RecordingState(this);
-                var meter = CreateLoadMeter(this, picLoadInfo, dspComponent);
+                CheckIntervalLength();
 
                 try
                 {
@@ -90,6 +92,18 @@ namespace Rockon
             };
 
             return new LoadMeter(form, pictureBox, names, sources);
+        }
+
+        private void CheckIntervalLength()
+        {
+            var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
+            if (intervalTime < 0.01)
+            {
+                var message =
+                    "オーディオデバイスのバッファ長が 10 ms 未満に設定されています。" + Environment.NewLine +
+                    "アプリの動作を安定させるため、バッファ長を 10 ms 以上に設定することを推奨します。";
+                MessageBox.Show(message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btnRecordingStartStop_Click(object sender, EventArgs e)
@@ -145,6 +159,7 @@ namespace Rockon
 
         private void ClosingEnd()
         {
+            loadMeter?.Dispose();
             dspComponent?.Dispose();
         }
 
@@ -174,6 +189,7 @@ namespace Rockon
                     {
                         asioDspSetting.OutputChannels.Add(ch);
                     }
+                    //asioDspSetting.UseLongInterval = false;
 
                     dspDriver = new AsioDspDriver(asioDspSetting);
 
@@ -321,7 +337,10 @@ namespace Rockon
                 recording = false;
 
                 channelFocus = 0;
-                form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
+                if (form.dspComponent.DspDriver.OutputChannelCount > 0)
+                {
+                    form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
+                }
 
                 UpdateForm();
             }
@@ -343,6 +362,7 @@ namespace Rockon
                     form.lblRecordingNumber.ForeColor = Color.LightPink;
                     form.txtDebugInfo.BackColor = Color.LightPink;
                     form.txtDebugInfo.ForeColor = Color.DarkRed;
+                    form.loadMeter.SetRecordingState(true);
                 }
                 else
                 {
@@ -358,6 +378,7 @@ namespace Rockon
                     form.lblRecordingNumber.ForeColor = SystemColors.ControlLight;
                     form.txtDebugInfo.BackColor = Color.Empty;
                     form.txtDebugInfo.ForeColor = Color.Empty;
+                    form.loadMeter.SetRecordingState(false);
                 }
             }
 
@@ -431,16 +452,22 @@ namespace Rockon
 
             public void UpChannelFocus()
             {
-                channelFocus = Math.Max(channelFocus - 1, 0);
-                form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
-                form.picWaveformMonitor.Refresh();
+                if (form.dspComponent.DspDriver.OutputChannelCount > 0)
+                {
+                    channelFocus = Math.Max(channelFocus - 1, 0);
+                    form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
+                    form.picWaveformMonitor.Refresh();
+                }
             }
 
             public void DownChannelFocus()
             {
-                channelFocus = Math.Min(channelFocus + 1, form.dspComponent.DspDriver.InputChannelCount - 1);
-                form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
-                form.picWaveformMonitor.Refresh();
+                if (form.dspComponent.DspDriver.OutputChannelCount > 0)
+                {
+                    channelFocus = Math.Min(channelFocus + 1, form.dspComponent.DspDriver.InputChannelCount - 1);
+                    form.dspComponent.WaveformMonitor.SetChannelFocus(channelFocus);
+                    form.picWaveformMonitor.Refresh();
+                }
             }
         }
 

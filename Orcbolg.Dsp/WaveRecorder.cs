@@ -26,8 +26,8 @@ namespace Orcbolg.Dsp
         private long recordingSampleCount;
         private int bufferedSampleCount;
         private long recordedSampleCount;
-
         private long recordingStartPosition;
+
         private long processedSampleCount;
 
         public WaveRecorder(IDspDriver driver)
@@ -46,8 +46,8 @@ namespace Orcbolg.Dsp
             recordingSampleCount = 0;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
-
             recordingStartPosition = -1;
+
             processedSampleCount = 0;
         }
 
@@ -109,9 +109,7 @@ namespace Orcbolg.Dsp
             recordingSampleCount = command.SampleCount;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
-
             recordingStartPosition = -1;
-            processedSampleCount = 0;
         }
 
         private void Process(IDspContext context, RecordingAbortCommand command)
@@ -215,8 +213,6 @@ namespace Orcbolg.Dsp
             recordingSampleCount = 0;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
-
-            processedSampleCount = 0;
             recordingStartPosition = -1;
         }
 
