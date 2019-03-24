@@ -82,6 +82,7 @@
             // txtDebugInfo
             // 
             this.txtDebugInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtDebugInfo.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.txtDebugInfo.Location = new System.Drawing.Point(328, 8);
             this.txtDebugInfo.Multiline = true;
             this.txtDebugInfo.Name = "txtDebugInfo";

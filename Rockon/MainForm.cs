@@ -27,6 +27,18 @@ namespace Rockon
             running = false;
         }
 
+        private void DebugWrite(string value)
+        {
+            if (txtDebugInfo.TextLength > 0)
+            {
+                txtDebugInfo.AppendText(Environment.NewLine + value);
+            }
+            else
+            {
+                txtDebugInfo.AppendText(value);
+            }
+        }
+
         private async void Form1_Shown(object sender, EventArgs e)
         {
             if (running)
@@ -38,12 +50,15 @@ namespace Rockon
 
             try
             {
+                await Task.Delay(100);
+
                 setting = await Task.Run(() => new Setting());
                 dspComponent = new DspComponent(setting, this);
                 FormHelper.SetFormResizeAction(this, MonitorResize);
                 FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
                 loadMeter = CreateLoadMeter(this, picLoadInfo, dspComponent);
                 recordingState = new RecordingState(this);
+                PrintSetting();
                 CheckIntervalLength();
 
                 try
@@ -67,6 +82,38 @@ namespace Rockon
                 }
                 Close();
             }
+        }
+
+        private void PrintSetting()
+        {
+            DebugWrite("[基本設定]");
+            DebugWrite("設定ファイル: " + setting.CfgPath);
+            DebugWrite("ドライバ名: " + dspComponent.DspDriver.DriverName + " (" + setting.DriverName + ")");
+            DebugWrite("サンプリング周波数: " + setting.SampleRate + " Hz");
+            DebugWrite("バッファ長: " + setting.BufferLength + " (" + ((double)setting.BufferLength / setting.SampleRate) + " sec)");
+            DebugWrite("波形更新周期: " + setting.UpdateInterval);
+            DebugWrite("描画周期: " + setting.DrawCycle);
+            DebugWrite("");
+            DebugWrite("[入力チャネル]");
+            for (var ch = 0; ch < setting.InputChannels.Count; ch++)
+            {
+                DebugWrite("Ch " + (ch + 1) + ": " + dspComponent.DspDriver.GetInputChannelName(ch) + " (x " + setting.InputGains[ch].ToString("0.0") + ")");
+            }
+            DebugWrite("");
+            DebugWrite("[出力チャネル]");
+            if (setting.OutputChannels.Count > 0)
+            {
+                for (var ch = 0; ch < setting.OutputChannels.Count; ch++)
+                {
+                    DebugWrite("Ch " + (ch + 1) + ": " + dspComponent.DspDriver.GetOutputChannelName(ch) + " (x " + setting.OutputGains[ch].ToString("0.0") + ")");
+                }
+            }
+            else
+            {
+                DebugWrite("なし");
+            }
+            DebugWrite("");
+            DebugWrite("[動作開始]");
         }
 
         private static LoadMeter CreateLoadMeter(Form form, PictureBox pictureBox, DspComponent dspComponent)
@@ -99,6 +146,7 @@ namespace Rockon
             var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
             if (intervalTime < 0.01)
             {
+                DebugWrite("オーディオデバイスのバッファ長が 10 ms 未満に設定されています。");
                 var message =
                     "オーディオデバイスのバッファ長が 10 ms 未満に設定されています。" + Environment.NewLine +
                     "アプリの動作を安定させるため、バッファ長を 10 ms 以上に設定することを推奨します。";
@@ -155,6 +203,7 @@ namespace Rockon
         private void ClosingStart()
         {
             dspComponent?.DspContext.Stop();
+            DebugWrite("アプリを終了しています。しばらくお待ちください。");
         }
 
         private void ClosingEnd()
@@ -410,14 +459,19 @@ namespace Rockon
                 {
                     if (Directory.Exists(form.setting.RecordingDirectory))
                     {
-                        var path = Path.Combine(form.setting.RecordingDirectory, GetNewFileName() + ".wav");
+                        var filename = GetNewFileName() + ".wav";
+                        var path = Path.Combine(form.setting.RecordingDirectory, filename);
                         form.dspComponent.DspContext.StartRecording(number, path);
                         recording = true;
+                        form.DebugWrite("録音開始 (No " + number + ", " + filename + ")");
                         UpdateForm();
                     }
                     else
                     {
-                        Console.WriteLine("ｳﾜｧｰ");
+                        var message =
+                            "録音用ディレクトリ " + form.setting.RecordingDirectory + " が存在しません。" + Environment.NewLine +
+                            "設定項目 rec_directory を確認してください。";
+                        MessageBox.Show(message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -429,6 +483,7 @@ namespace Rockon
                     form.dspComponent.DspContext.AbortRecording();
                     recording = false;
                     number = Math.Min(number + 1, 9999);
+                    form.DebugWrite("録音停止");
                     UpdateForm();
                 }
             }
@@ -439,20 +494,27 @@ namespace Rockon
                 {
                     recording = false;
                     number = Math.Min(number + 1, 9999);
+                    form.DebugWrite("録音停止");
                     UpdateForm();
                 }
             }
 
             public void DecrementNumber()
             {
-                number = Math.Max(number - 1, 1);
-                UpdateForm();
+                if (!recording)
+                {
+                    number = Math.Max(number - 1, 1);
+                    UpdateForm();
+                }
             }
 
             public void IncrementNumber()
             {
-                number = Math.Min(number + 1, 9999);
-                UpdateForm();
+                if (!recording)
+                {
+                    number = Math.Min(number + 1, 9999);
+                    UpdateForm();
+                }
             }
 
             private string GetNewFileName()

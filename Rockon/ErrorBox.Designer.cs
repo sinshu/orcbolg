@@ -33,8 +33,8 @@
             this.lblMessage = new System.Windows.Forms.Label();
             this.s_lblModule = new System.Windows.Forms.Label();
             this.lblModule = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.s_lblDebugInfo = new System.Windows.Forms.Label();
+            this.txtDebugInfo = new System.Windows.Forms.TextBox();
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -87,29 +87,29 @@
             this.lblModule.TabIndex = 4;
             this.lblModule.Text = "lblModule";
             // 
-            // label6
+            // s_lblDebugInfo
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label6.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label6.Location = new System.Drawing.Point(16, 144);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(31, 12);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "詳細";
+            this.s_lblDebugInfo.AutoSize = true;
+            this.s_lblDebugInfo.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.s_lblDebugInfo.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.s_lblDebugInfo.Location = new System.Drawing.Point(16, 144);
+            this.s_lblDebugInfo.Name = "s_lblDebugInfo";
+            this.s_lblDebugInfo.Size = new System.Drawing.Size(31, 12);
+            this.s_lblDebugInfo.TabIndex = 5;
+            this.s_lblDebugInfo.Text = "詳細";
             // 
-            // textBox1
+            // txtDebugInfo
             // 
-            this.textBox1.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.textBox1.Font = new System.Drawing.Font("ＭＳ ゴシック", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.textBox1.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.textBox1.Location = new System.Drawing.Point(16, 160);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(568, 176);
-            this.textBox1.TabIndex = 6;
+            this.txtDebugInfo.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtDebugInfo.Font = new System.Drawing.Font("ＭＳ ゴシック", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.txtDebugInfo.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.txtDebugInfo.Location = new System.Drawing.Point(16, 160);
+            this.txtDebugInfo.Multiline = true;
+            this.txtDebugInfo.Name = "txtDebugInfo";
+            this.txtDebugInfo.ReadOnly = true;
+            this.txtDebugInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtDebugInfo.Size = new System.Drawing.Size(568, 176);
+            this.txtDebugInfo.TabIndex = 6;
             // 
             // btnCopy
             // 
@@ -139,8 +139,8 @@
             this.ClientSize = new System.Drawing.Size(600, 400);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnCopy);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label6);
+            this.Controls.Add(this.txtDebugInfo);
+            this.Controls.Add(this.s_lblDebugInfo);
             this.Controls.Add(this.lblModule);
             this.Controls.Add(this.s_lblModule);
             this.Controls.Add(this.lblMessage);
@@ -166,8 +166,8 @@
         private System.Windows.Forms.Label lblMessage;
         private System.Windows.Forms.Label s_lblModule;
         private System.Windows.Forms.Label lblModule;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label s_lblDebugInfo;
+        private System.Windows.Forms.TextBox txtDebugInfo;
         private System.Windows.Forms.Button btnCopy;
         private System.Windows.Forms.Button btnExit;
     }

@@ -30,7 +30,7 @@ namespace Rockon
             {
                 lblModule.Text = exception.Source;
             }
-            textBox1.Text = exception.ToString();
+            txtDebugInfo.Text = exception.ToString();
         }
 
         private void btnCopy_Click(object sender, EventArgs e)
