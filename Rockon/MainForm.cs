@@ -90,7 +90,8 @@ namespace Rockon
             DebugWrite("設定ファイル: " + setting.CfgPath);
             DebugWrite("ドライバ名: " + dspComponent.DspDriver.DriverName + " (" + setting.DriverName + ")");
             DebugWrite("サンプリング周波数: " + setting.SampleRate + " Hz");
-            DebugWrite("バッファ長: " + setting.BufferLength + " (" + ((double)setting.BufferLength / setting.SampleRate) + " sec)");
+            DebugWrite("バッファ長(デバイス): " + dspComponent.DspDriver.IntervalLength + " (" + (1000.0 * dspComponent.DspDriver.IntervalLength / setting.SampleRate).ToString("0.0") + " ms)");
+            DebugWrite("バッファ長(録音): " + setting.BufferLength + " (" + ((double)setting.BufferLength / setting.SampleRate).ToString("0.0") + " sec)");
             DebugWrite("波形更新周期: " + setting.UpdateInterval);
             DebugWrite("描画周期: " + setting.DrawCycle);
             DebugWrite("");

@@ -45,13 +45,18 @@ namespace Rockon
             outputGains = GetFloatList(dic, "output_gains").ToArray();
             recordingDirectory = Path.Combine(defaultDirectory, GetString(dic, "rec_directory"));
 
+            if (inputChannels.Length == 0)
+            {
+                throw new Exception("input_channels には 1 個以上のチャネルを指定する必要があります。");
+            }
+
             if (inputGains.Length == 1)
             {
                 inputGains = Enumerable.Repeat(inputGains[0], inputChannels.Length).ToArray();
             }
             else if (inputGains.Length != inputChannels.Length)
             {
-                throw new Exception("input_gain に指定する値の個数は 1 または input_channel に指定された値の個数に一致する必要があります。");
+                throw new Exception("input_gains に指定する値の個数は 1 または input_channels に指定された値の個数に一致する必要があります。");
             }
             if (outputGains.Length == 1)
             {
@@ -59,7 +64,7 @@ namespace Rockon
             }
             else if (outputGains.Length != outputChannels.Length)
             {
-                throw new Exception("output_gain に指定する値の個数は 1 または output_channel に指定された値の個数に一致する必要があります。");
+                throw new Exception("output_gains に指定する値の個数は 1 または output_channels に指定された値の個数に一致する必要があります。");
             }
         }
 
