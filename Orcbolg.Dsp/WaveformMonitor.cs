@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -53,9 +54,16 @@ namespace Orcbolg.Dsp
 
         public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateInterval, int drawCycle, bool showOutput)
         {
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+            if (pictureBox == null) throw new ArgumentNullException(nameof(pictureBox));
+
             if ((double)updateInterval / driver.SampleRate < 0.001)
             {
                 throw new ArgumentException("Update interval must be greater than or equal to 1 ms.");
+            }
+            if (drawCycle <= 0)
+            {
+                throw new ArgumentException("Draw cycle must be greater than or equal to 1.");
             }
 
             try
@@ -133,10 +141,10 @@ namespace Orcbolg.Dsp
 
                 pictureBox.Paint += PictureBox_Paint;
             }
-            catch
+            catch (Exception e)
             {
                 Dispose();
-                throw;
+                ExceptionDispatchInfo.Capture(e).Throw();
             }
         }
 

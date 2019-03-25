@@ -4,13 +4,19 @@ using System.Linq;
 
 namespace Orcbolg.Dsp
 {
-    public class Bypass : IRealtimeDsp
+    public sealed class Bypass : IRealtimeDsp
     {
-        private int[] outputToInputChannel;
+        private readonly int inputChannelCount;
+        private readonly int outputChannelCount;
+        private readonly int[] outputToInputChannel;
 
         public Bypass(IDspDriver driver)
         {
-            outputToInputChannel = new int[driver.OutputChannelCount];
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
+            inputChannelCount = driver.InputChannelCount;
+            outputChannelCount = driver.OutputChannelCount;
+            outputToInputChannel = new int[outputChannelCount];
         }
 
         public void Process(float[][] inputBuffers, float[][] outputBuffers, int length)
@@ -29,6 +35,15 @@ namespace Orcbolg.Dsp
 
         public void SetConnection(int inputChannel, int outputChannel)
         {
+            if (!(0 <= inputChannel && inputChannel < inputChannelCount))
+            {
+                throw new IndexOutOfRangeException(nameof(inputChannel));
+            }
+            if (!(0 <= outputChannel && outputChannel < outputChannelCount))
+            {
+                throw new IndexOutOfRangeException(nameof(outputChannel));
+            }
+
             outputToInputChannel[outputChannel] = inputChannel;
         }
     }

@@ -17,6 +17,8 @@ namespace Orcbolg.Dsp
 
         public Watchdog(IDspDriver driver)
         {
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
             var value = Math.Max(1.5 * driver.IntervalLength / driver.SampleRate, 0.01);
             threshold = TimeSpan.FromSeconds(value);
             previous = TimeSpan.FromDays(1);

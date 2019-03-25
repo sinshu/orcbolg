@@ -8,19 +8,19 @@ namespace Orcbolg.Dsp
 {
     internal static class DspHelper
     {
-        public static int FillBuffer(Stream stream, byte[] buffer)
+        public static int FillBuffer(Stream stream, byte[] buffer, int count)
         {
             int read = 0;
             while (true)
             {
-                var dr = stream.Read(buffer, read, buffer.Length - read);
+                var dr = stream.Read(buffer, read, count - read);
                 if (dr == 0)
                 {
                     return read;
                 }
 
                 read += dr;
-                if (read == buffer.Length)
+                if (read == count)
                 {
                     return read;
                 }

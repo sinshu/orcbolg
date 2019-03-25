@@ -244,8 +244,6 @@ namespace Rockon
                     //asioDspSetting.UseLongInterval = false;
 
                     dspDriver = new AsioDspDriver(asioDspSetting);
-                    //dspDriver = new FileDspDriver("test.wav",  2345);
-                    //dspDriver = new FileDspDriver("test.wav", "out.wav", 2, 2345);
 
                     inputGain = new InputGain(dspDriver, setting.InputGains);
                     dspDriver.AddDsp(inputGain);

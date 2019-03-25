@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orcbolg.Dsp", "Orcbolg.Dsp\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rockon", "Rockon\Rockon.csproj", "{D251BBAA-C1CE-409D-B088-89B54764B3DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orcbolg.Recog", "Orcbolg.Recog\Orcbolg.Recog.csproj", "{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D251BBAA-C1CE-409D-B088-89B54764B3DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D251BBAA-C1CE-409D-B088-89B54764B3DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D251BBAA-C1CE-409D-B088-89B54764B3DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,6 +32,8 @@ namespace Orcbolg.Dsp
 
         public WaveRecorder(IDspDriver driver)
         {
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
             channelCount = driver.InputChannelCount;
             bufferLength = driver.SampleRate / 10;
             format = new WaveFormat(driver.SampleRate, driver.InputChannelCount);

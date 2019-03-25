@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Wave.Asio;
@@ -39,13 +40,17 @@ namespace Orcbolg.Dsp
 
         public AsioDspDriver(AsioDspSetting setting)
         {
+            if (setting == null)
+            {
+                throw new ArgumentNullException(nameof(setting));
+            }
+            if (setting.InputChannels.Count == 0 && setting.OutputChannels.Count == 0)
+            {
+                throw new ArgumentException("At least one input or output channel must be selected.");
+            }
+
             try
             {
-                if (setting.InputChannels.Count == 0 && setting.OutputChannels.Count == 0)
-                {
-                    throw new ArgumentException("At least one input or output channel must be selected.");
-                }
-
                 driverName = setting.DriverName;
                 sampleRate = setting.SampleRate;
                 bufferLength = setting.BufferLength;
@@ -110,10 +115,10 @@ namespace Orcbolg.Dsp
 
                 state = DspState.Initialized;
             }
-            catch
+            catch (Exception e)
             {
                 Dispose();
-                throw;
+                ExceptionDispatchInfo.Capture(e).Throw();
             }
         }
 

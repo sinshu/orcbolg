@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5DDFBD63-EE78-4888-A3A6-54AC5026A2EC}</ProjectGuid>
+    <ProjectGuid>{5CA99A31-5562-49CD-9990-B8E2CD2A1D6E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Orcbolg.Dsp</RootNamespace>
-    <AssemblyName>Orcbolg.Dsp</AssemblyName>
+    <RootNamespace>Orcbolg.Recog</RootNamespace>
+    <AssemblyName>Orcbolg.Recog</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,45 +28,20 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.8.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NAudio.1.8.5\lib\net35\NAudio.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.4.7.0\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsioDspDriver.cs" />
-    <Compile Include="AsioDspSetting.cs" />
-    <Compile Include="Bypass.cs" />
-    <Compile Include="DspBuffer.cs" />
-    <Compile Include="DspBufferEntry.cs" />
-    <Compile Include="DspException.cs" />
-    <Compile Include="DspHelper.cs" />
-    <Compile Include="DspScheduler.cs" />
-    <Compile Include="FileDspDriver.cs" />
-    <Compile Include="IDspCommand.cs" />
-    <Compile Include="IDspContext.cs" />
-    <Compile Include="IDspDriver.cs" />
-    <Compile Include="INonrealtimeDsp.cs" />
-    <Compile Include="InputGain.cs" />
-    <Compile Include="IntervalCommand.cs" />
-    <Compile Include="IRealtimeDsp.cs" />
-    <Compile Include="KeyDownCommand.cs" />
-    <Compile Include="OutputGain.cs" />
+    <Compile Include="Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WaveRecorder.cs" />
-    <Compile Include="StopCommand.cs" />
-    <Compile Include="Watchdog.cs" />
-    <Compile Include="WaveformMonitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

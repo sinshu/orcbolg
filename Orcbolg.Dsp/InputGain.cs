@@ -10,6 +10,9 @@ namespace Orcbolg.Dsp
 
         public InputGain(IDspDriver driver, IReadOnlyList<float> gains)
         {
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+            if (gains.Count != driver.InputChannelCount) throw new ArgumentException("Number of gains must be equal to number of input channels.");
+
             this.gains = gains.ToArray();
         }
 
