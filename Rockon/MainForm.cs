@@ -86,7 +86,7 @@ namespace Rockon
 
         private void PrintSetting()
         {
-            DebugWrite("[基本設定]");
+            DebugWrite("========== 基本設定 ==========");
             DebugWrite("設定ファイル: " + setting.CfgPath);
             DebugWrite("ドライバ名: " + dspComponent.DspDriver.DriverName + " (" + setting.DriverName + ")");
             DebugWrite("サンプリング周波数: " + setting.SampleRate + " Hz");
@@ -95,13 +95,13 @@ namespace Rockon
             DebugWrite("波形更新周期: " + setting.UpdateInterval);
             DebugWrite("描画周期: " + setting.DrawCycle);
             DebugWrite("");
-            DebugWrite("[入力チャネル]");
+            DebugWrite("========== 入力チャネル ==========");
             for (var ch = 0; ch < setting.InputChannels.Count; ch++)
             {
                 DebugWrite("Ch " + (ch + 1) + ": " + dspComponent.DspDriver.GetInputChannelName(ch) + " (x " + setting.InputGains[ch].ToString("0.0") + ")");
             }
             DebugWrite("");
-            DebugWrite("[出力チャネル]");
+            DebugWrite("========== 出力チャネル ==========");
             if (setting.OutputChannels.Count > 0)
             {
                 for (var ch = 0; ch < setting.OutputChannels.Count; ch++)
@@ -114,7 +114,7 @@ namespace Rockon
                 DebugWrite("なし");
             }
             DebugWrite("");
-            DebugWrite("[動作開始]");
+            DebugWrite("========== 動作開始 ==========");
         }
 
         private static LoadMeter CreateLoadMeter(Form form, PictureBox pictureBox, DspComponent dspComponent)
@@ -147,11 +147,7 @@ namespace Rockon
             var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
             if (intervalTime < 0.01)
             {
-                DebugWrite("オーディオデバイスのバッファ長が 10 ms 未満に設定されています。");
-                var message =
-                    "オーディオデバイスのバッファ長が 10 ms 未満に設定されています。" + Environment.NewLine +
-                    "アプリの動作を安定させるため、バッファ長を 10 ms 以上に設定することを推奨します。";
-                MessageBox.Show(message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DebugWrite("[警告] オーディオデバイスのバッファ長が 10 ms 未満です。アプリの動作を安定させるため、バッファ長を 10 ms 以上に設定してください。");
             }
         }
 
@@ -467,10 +463,7 @@ namespace Rockon
                     }
                     else
                     {
-                        var message =
-                            "録音用ディレクトリ " + form.setting.RecordingDirectory + " が存在しません。" + Environment.NewLine +
-                            "設定項目 rec_directory を確認してください。";
-                        MessageBox.Show(message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        form.DebugWrite("[警告] 録音用ディレクトリ " + form.setting.RecordingDirectory + " は存在しません。設定項目 rec_directory を確認してください。");
                     }
                 }
             }
