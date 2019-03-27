@@ -17,7 +17,6 @@ namespace Rockon
 
         private Setting setting;
         private DspComponent dspComponent;
-        private LoadMeter loadMeter;
         private RecordingState recordingState;
 
         public MainForm()
@@ -56,7 +55,6 @@ namespace Rockon
                 dspComponent = new DspComponent(setting, this);
                 FormHelper.SetFormResizeAction(this, MonitorResize);
                 FormHelper.SetAsyncFormClosingAction(this, ClosingStart, ClosingEnd, dspComponent.DspContext.Completion);
-                loadMeter = CreateLoadMeter(this, picLoadInfo, dspComponent);
                 recordingState = new RecordingState(this);
                 PrintSetting();
                 CheckIntervalLength();
@@ -115,31 +113,6 @@ namespace Rockon
             }
             DebugWrite("");
             DebugWrite("========== 動作開始 ==========");
-        }
-
-        private static LoadMeter CreateLoadMeter(Form form, PictureBox pictureBox, DspComponent dspComponent)
-        {
-            var names = new string[]
-            {
-                "DSP",
-                "描画",
-                "録音"
-            };
-
-            var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
-            var bufferLength = Math.Min(dspComponent.AsioDspSetting.BufferLength, dspComponent.DspDriver.SampleRate);
-            var dspContext = dspComponent.DspContext;
-            var waveformMonitor = dspComponent.WaveformMonitor;
-            var waveRecorder = dspComponent.WaveRecorder;
-
-            var sources = new Func<double>[]
-            {
-                () => dspComponent.Watchdog.DspTime / intervalTime,
-                () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
-                () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
-            };
-
-            return new LoadMeter(form, pictureBox, names, sources);
         }
 
         private void CheckIntervalLength()
@@ -205,7 +178,6 @@ namespace Rockon
 
         private void ClosingEnd()
         {
-            loadMeter?.Dispose();
             dspComponent?.Dispose();
         }
 
@@ -223,6 +195,7 @@ namespace Rockon
             private Watchdog watchdog;
             private CommandPicker commandPicker;
             private IDspContext dspContext;
+            private LoadMeter loadMeter;
 
             public DspComponent(Setting setting, MainForm form)
             {
@@ -263,6 +236,8 @@ namespace Rockon
                     dspDriver.AddDsp(commandPicker);
 
                     dspContext = dspDriver.Run();
+
+                    loadMeter = CreateLoadMeter(form, form.picLoadInfo, this);
                 }
                 catch
                 {
@@ -283,8 +258,43 @@ namespace Rockon
                 throw new Exception("オーディオデバイス " + shortName + " が見つかりませんでした。");
             }
 
+            private static LoadMeter CreateLoadMeter(Form form, PictureBox pictureBox, DspComponent dspComponent)
+            {
+                var names = new string[]
+                {
+                "DSP",
+                "描画",
+                "録音"
+                };
+
+                var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
+                var bufferLength = Math.Min(dspComponent.AsioDspSetting.BufferLength, dspComponent.DspDriver.SampleRate);
+                var dspContext = dspComponent.DspContext;
+                var waveformMonitor = dspComponent.WaveformMonitor;
+                var waveRecorder = dspComponent.WaveRecorder;
+
+                var sources = new Func<double>[]
+                {
+                () => dspComponent.Watchdog.DspTime / intervalTime,
+                () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
+                () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
+                };
+
+                return new LoadMeter(form, pictureBox, names, sources);
+            }
+
             public void Dispose()
             {
+                if (loadMeter != null)
+                {
+                    loadMeter.Dispose();
+                    loadMeter = null;
+                }
+                if (dspContext != null)
+                {
+                    dspContext.Stop();
+                    dspContext = null;
+                }
                 if (waveRecorder != null)
                 {
                     waveRecorder.Dispose();
@@ -295,16 +305,12 @@ namespace Rockon
                     waveformMonitor.Dispose();
                     waveformMonitor = null;
                 }
-                if (dspContext != null)
-                {
-                    dspContext.Stop();
-                    dspContext = null;
-                }
                 if (dspDriver != null)
                 {
                     dspDriver.Dispose();
                     dspDriver = null;
                 }
+
             }
 
             public AsioDspSetting AsioDspSetting
@@ -370,6 +376,14 @@ namespace Rockon
                     return dspContext;
                 }
             }
+
+            public LoadMeter LoadMeter
+            {
+                get
+                {
+                    return loadMeter;
+                }
+            }
         }
 
 
@@ -416,7 +430,7 @@ namespace Rockon
                     form.lblRecordingNumber.ForeColor = Color.LightPink;
                     form.txtDebugInfo.BackColor = Color.LightPink;
                     form.txtDebugInfo.ForeColor = Color.DarkRed;
-                    form.loadMeter.SetRecordingState(true);
+                    form.dspComponent.LoadMeter.SetRecordingState(true);
                 }
                 else
                 {
@@ -432,7 +446,7 @@ namespace Rockon
                     form.lblRecordingNumber.ForeColor = SystemColors.ControlLight;
                     form.txtDebugInfo.BackColor = Color.Empty;
                     form.txtDebugInfo.ForeColor = Color.Empty;
-                    form.loadMeter.SetRecordingState(false);
+                    form.dspComponent.LoadMeter.SetRecordingState(false);
                 }
             }
 

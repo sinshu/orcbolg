@@ -184,6 +184,7 @@ namespace Orcbolg.Dsp
 
             if (naDriverExt != null)
             {
+                naDriverExt.Stop();
                 naDriverExt.ReleaseDriver();
                 naDriver = null;
                 naDriverExt = null;

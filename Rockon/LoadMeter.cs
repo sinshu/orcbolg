@@ -43,7 +43,7 @@ namespace Rockon
                 font = new Font(FontFamily.GenericMonospace, 9);
 
                 timer = new Timer();
-                timer.Interval = 100;
+                timer.Interval = 200;
                 timer.Tick += Timer_Tick;
 
                 recording = false;
