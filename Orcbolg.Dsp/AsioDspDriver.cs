@@ -33,6 +33,10 @@ namespace Orcbolg.Dsp
         private NAudioAsioDriver naDriver;
         private NAudioAsioDriverExt naDriverExt;
 
+        private Action<IntPtr, float[], int> readDelegate;
+        private Action<IntPtr, float[], int> writeDelegate;
+        private Action<IntPtr, int> clearDelegate;
+
         private readonly int intervalLength;
         private readonly DspBuffer buffer;
 
@@ -89,23 +93,18 @@ namespace Orcbolg.Dsp
                 naDriver = NAudioAsioDriver.GetAsioDriverByName(driverName);
                 naDriverExt = new NAudioAsioDriverExt(naDriver);
 
-                for (var ch = 0; ch < asioInputChannelIndices.Length; ch++)
+                AsioSampleType asioSampleType;
+                if (naDriverExt.Capabilities.InputChannelInfos.Length > 0)
                 {
-                    var info = naDriverExt.Capabilities.InputChannelInfos[asioInputChannelIndices[ch]];
-                    if (info.type != AsioSampleType.Int32LSB)
-                    {
-                        throw new NotSupportedException("ASIO sample type must be Int32LSB.");
-                    }
+                    asioSampleType = naDriverExt.Capabilities.InputChannelInfos[0].type;
                 }
-
-                for (var ch = 0; ch < asioOutputChannelIndices.Length; ch++)
+                else
                 {
-                    var info = naDriverExt.Capabilities.OutputChannelInfos[asioOutputChannelIndices[ch]];
-                    if (info.type != AsioSampleType.Int32LSB)
-                    {
-                        throw new NotSupportedException("ASIO sample type must be Int32LSB.");
-                    }
+                    asioSampleType = naDriverExt.Capabilities.OutputChannelInfos[0].type;
                 }
+                readDelegate = AsioSampleConverter.GetReadDelegate(asioSampleType);
+                writeDelegate = AsioSampleConverter.GetWriteDelegate(asioSampleType);
+                clearDelegate = AsioSampleConverter.GetClearDelegate(asioSampleType);
 
                 naDriverExt.SetSampleRate(sampleRate);
                 intervalLength = naDriverExt.CreateBuffers(asioOutputChannelCount, asioInputChannelCount, useLongInterval);
@@ -323,14 +322,7 @@ namespace Orcbolg.Dsp
                     {
                         for (var ch = 0; ch < driver.asioOutputChannelIndices.Length; ch++)
                         {
-                            unsafe
-                            {
-                                var p = (int*)outputChannels[driver.asioOutputChannelIndices[ch]];
-                                for (var t = 0; t < driver.buffer.IntervalLength; t++)
-                                {
-                                    p[t] = 0;
-                                }
-                            }
+                            driver.clearDelegate(outputChannels[driver.asioOutputChannelIndices[ch]], driver.intervalLength);
                         }
                         return;
                     }
@@ -348,15 +340,7 @@ namespace Orcbolg.Dsp
 
                     for (var ch = 0; ch < driver.asioInputChannelIndices.Length; ch++)
                     {
-                        unsafe
-                        {
-                            var p = (int*)inputChannels[driver.asioInputChannelIndices[ch]];
-                            var interval = entry.InputInterval[ch];
-                            for (var t = 0; t < driver.buffer.IntervalLength; t++)
-                            {
-                                interval[t] = (float)p[t] / 0x80000000L;
-                            }
-                        }
+                        driver.readDelegate(inputChannels[driver.asioInputChannelIndices[ch]], entry.InputInterval[ch], driver.intervalLength);
                     }
 
                     foreach (var realtimeDsp in driver.realtimeDsps)
@@ -366,27 +350,10 @@ namespace Orcbolg.Dsp
 
                     for (var ch = 0; ch < driver.asioOutputChannelIndices.Length; ch++)
                     {
-                        unsafe
-                        {
-                            var p = (int*)outputChannels[driver.asioOutputChannelIndices[ch]];
-                            var interval = entry.OutputInterval[ch];
-                            for (var t = 0; t < driver.buffer.IntervalLength; t++)
-                            {
-                                var value = (long)(0x80000000L * interval[t]);
-                                if (value > int.MaxValue)
-                                {
-                                    value = int.MaxValue;
-                                }
-                                else if (value < int.MinValue)
-                                {
-                                    value = int.MinValue;
-                                }
-                                p[t] = (int)value;
-                            }
-                        }
+                        driver.writeDelegate(outputChannels[driver.asioOutputChannelIndices[ch]], entry.OutputInterval[ch], driver.intervalLength);
                     }
 
-                    Interlocked.Add(ref processedSampleCount, driver.buffer.IntervalLength);
+                    Interlocked.Add(ref processedSampleCount, driver.intervalLength);
 
                     entry.DspEndTime = stopwatch.Elapsed;
                     driver.buffer.EndWriting();
@@ -415,6 +382,140 @@ namespace Orcbolg.Dsp
                 get
                 {
                     return completion;
+                }
+            }
+        }
+
+
+
+        private static class AsioSampleConverter
+        {
+            public static Action<IntPtr, float[], int> GetReadDelegate(AsioSampleType asioSampleType)
+            {
+                switch (asioSampleType)
+                {
+                    case AsioSampleType.Int32LSB:
+                        return Read_Int32LSB;
+                    case AsioSampleType.Int32LSB24:
+                        return Read_Int32LSB24;
+                    default:
+                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                }
+            }
+
+            public static Action<IntPtr, float[], int> GetWriteDelegate(AsioSampleType asioSampleType)
+            {
+                switch (asioSampleType)
+                {
+                    case AsioSampleType.Int32LSB:
+                        return Write_Int32LSB;
+                    case AsioSampleType.Int32LSB24:
+                        return Write_Int32LSB24;
+                    default:
+                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                }
+            }
+
+            public static Action<IntPtr, int> GetClearDelegate(AsioSampleType asioSampleType)
+            {
+                switch (asioSampleType)
+                {
+                    case AsioSampleType.Int32LSB:
+                        return Clear_Int32LSB;
+                    case AsioSampleType.Int32LSB24:
+                        return Clear_Int32LSB24;
+                    default:
+                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                }
+            }
+
+            private static void Read_Int32LSB(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        buffer[t] = (float)p[t] / 0x80000000L;
+                    }
+                }
+            }
+
+            private static void Write_Int32LSB(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        var value = (long)(0x80000000L * buffer[t]);
+                        if (value > int.MaxValue)
+                        {
+                            value = int.MaxValue;
+                        }
+                        else if (value < int.MinValue)
+                        {
+                            value = int.MinValue;
+                        }
+                        p[t] = (int)value;
+                    }
+                }
+            }
+
+            private static void Clear_Int32LSB(IntPtr ptr, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        p[t] = 0;
+                    }
+                }
+            }
+
+            private static void Read_Int32LSB24(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        buffer[t] = (float)(p[t] << 8) / 0x80000000L;
+                    }
+                }
+            }
+
+            private static void Write_Int32LSB24(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        var value = (int)(0x800000 * buffer[t]);
+                        if (value > 0x7FFFFF)
+                        {
+                            value = 0x7FFFFF;
+                        }
+                        else if (value < -0x800000)
+                        {
+                            value = -0x800000;
+                        }
+                        p[t] = (int)value;
+                    }
+                }
+            }
+
+            private static void Clear_Int32LSB24(IntPtr ptr, int length)
+            {
+                unsafe
+                {
+                    var p = (int*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        p[t] = 0;
+                    }
                 }
             }
         }
