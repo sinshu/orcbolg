@@ -164,7 +164,7 @@ namespace Orcbolg.Dsp
 
             if (state == DspState.Initialized || state == DspState.Stop)
             {
-                var context = new Context(this);
+                var context = new FileDspContext(this);
                 return context;
             }
             else
@@ -252,7 +252,7 @@ namespace Orcbolg.Dsp
 
 
 
-        private class Context : IDspContext
+        private class FileDspContext : IDspContext
         {
             private readonly FileDspDriver driver;
 
@@ -263,7 +263,7 @@ namespace Orcbolg.Dsp
 
             private Task completion;
 
-            public Context(FileDspDriver driver)
+            public FileDspContext(FileDspDriver driver)
             {
                 this.driver = driver;
 
@@ -306,10 +306,12 @@ namespace Orcbolg.Dsp
                     DspHelper.FillBuffer(driver.reader, driver.readBuffer, blockAlign * readLength);
                     DspHelper.ReadInt16(driver.readBuffer, entry.InputInterval, readLength);
 
+                    var value = 0;
                     foreach (var dsp in driver.realtimeDsps)
                     {
-                        dsp.Process(entry.InputInterval, entry.OutputInterval, readLength);
+                        value = dsp.Process(entry.InputInterval, entry.OutputInterval, readLength);
                     }
+                    entry.RealtimeDspReturnValue = value;
                     if (driver.writer != null)
                     {
                         DspHelper.WriteInt16(entry.OutputInterval, driver.writeBuffer, readLength);

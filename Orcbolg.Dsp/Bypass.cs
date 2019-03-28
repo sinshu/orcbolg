@@ -19,7 +19,7 @@ namespace Orcbolg.Dsp
             outputToInputChannel = new int[outputChannelCount];
         }
 
-        public void Process(float[][] inputBuffers, float[][] outputBuffers, int length)
+        public int Process(float[][] inputBuffers, float[][] outputBuffers, int length)
         {
             for (var ch = 0; ch < outputBuffers.Length; ch++)
             {
@@ -31,6 +31,8 @@ namespace Orcbolg.Dsp
                     outputBuffer[t] = inputBuffer[t];
                 }
             }
+
+            return 0;
         }
 
         public void SetConnection(int inputChannel, int outputChannel)

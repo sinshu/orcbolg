@@ -6,6 +6,6 @@ namespace Orcbolg.Dsp
 {
     public interface IRealtimeDsp
     {
-        void Process(float[][] inputInterval, float[][] outputInterval, int length);
+        int Process(float[][] inputInterval, float[][] outputInterval, int length);
     }
 }

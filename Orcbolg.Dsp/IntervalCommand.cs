@@ -19,6 +19,7 @@ namespace Orcbolg.Dsp
         public float[][] InputInterval => entry.InputInterval;
         public float[][] OutputInterval => entry.OutputInterval;
         public int Length => length;
+        public int RealtimeDspReturnValue => entry.RealtimeDspReturnValue;
         internal DspBufferEntry DspBufferEntry => entry;
     }
 }

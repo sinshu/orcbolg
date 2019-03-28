@@ -262,9 +262,9 @@ namespace Rockon
             {
                 var names = new string[]
                 {
-                "DSP",
-                "描画",
-                "録音"
+                    "DSP",
+                    "描画",
+                    "録音"
                 };
 
                 var intervalTime = (double)dspComponent.DspDriver.IntervalLength / dspComponent.DspDriver.SampleRate;
@@ -275,9 +275,9 @@ namespace Rockon
 
                 var sources = new Func<double>[]
                 {
-                () => dspComponent.Watchdog.DspTime / intervalTime,
-                () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
-                () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
+                    () => dspComponent.Watchdog.DspTime / intervalTime,
+                    () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
+                    () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
                 };
 
                 return new LoadMeter(form, pictureBox, names, sources);
@@ -561,11 +561,17 @@ namespace Rockon
 
         private class CommandPicker : INonrealtimeDsp
         {
-            private MainForm form;
+            private readonly MainForm form;
+
+            private int jumpingCount;
+            private int jumpingCountScale;
 
             public CommandPicker(MainForm form)
             {
                 this.form = form;
+
+                jumpingCount = 0;
+                jumpingCountScale = 1;
             }
 
             public void Process(IDspContext context, IDspCommand command)
@@ -575,11 +581,31 @@ namespace Rockon
                 {
                     Process(context, recordingCompleteCommand);
                 }
+
+                var jumpingWarningCommand = command as JumpingWarningCommand;
+                if (jumpingWarningCommand != null)
+                {
+                    Process(context, jumpingWarningCommand);
+                }
             }
 
             public void Process(IDspContext context, RecordingCompleteCommand command)
             {
                 form.Invoke((MethodInvoker)(() => form.recordingState.RecordingComplete()));
+            }
+
+            public void Process(IDspContext context, JumpingWarningCommand command)
+            {
+                jumpingCount++;
+                if (jumpingCount % jumpingCountScale == 0)
+                {
+                    var message = "[警告] 音飛びが検出されました (" + jumpingCount + " 回目)。";
+                    form.Invoke((MethodInvoker)(() => form.DebugWrite(message)));
+                }
+                if (jumpingCount == 10 * jumpingCountScale)
+                {
+                    jumpingCountScale *= 10;
+                }
             }
         }
     }

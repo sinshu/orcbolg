@@ -343,10 +343,12 @@ namespace Orcbolg.Dsp
                         driver.readDelegate(inputChannels[driver.asioInputChannelIndices[ch]], entry.InputInterval[ch], driver.intervalLength);
                     }
 
+                    var value = 0;
                     foreach (var realtimeDsp in driver.realtimeDsps)
                     {
-                        realtimeDsp.Process(entry.InputInterval, entry.OutputInterval, driver.buffer.IntervalLength);
+                        value = realtimeDsp.Process(entry.InputInterval, entry.OutputInterval, driver.buffer.IntervalLength);
                     }
+                    entry.RealtimeDspReturnValue = value;
 
                     for (var ch = 0; ch < driver.asioOutputChannelIndices.Length; ch++)
                     {
@@ -474,6 +476,8 @@ namespace Orcbolg.Dsp
                 }
             }
 
+            // Although this implementation seems to work for ZYLIA ZM-1,
+            // I'm not sure whether this is a correct way to handle Int32LSB24.
             private static void Read_Int32LSB24(IntPtr ptr, float[] buffer, int length)
             {
                 unsafe
@@ -502,7 +506,7 @@ namespace Orcbolg.Dsp
                         {
                             value = -0x800000;
                         }
-                        p[t] = (int)value;
+                        p[t] = value;
                     }
                 }
             }

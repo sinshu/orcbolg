@@ -15,6 +15,7 @@ namespace Orcbolg.Dsp
         private int referenceCount;
 
         private long position;
+        private int realtimeDspReturnValue;
         private TimeSpan dspStartTime;
         private TimeSpan dspEndTime;
 
@@ -89,6 +90,19 @@ namespace Orcbolg.Dsp
             set
             {
                 position = value;
+            }
+        }
+
+        public int RealtimeDspReturnValue
+        {
+            get
+            {
+                return realtimeDspReturnValue;
+            }
+
+            set
+            {
+                realtimeDspReturnValue = value;
             }
         }
 

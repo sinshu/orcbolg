@@ -16,7 +16,7 @@ namespace Orcbolg.Dsp
             this.gains = gains.ToArray();
         }
 
-        public void Process(float[][] inputBuffers, float[][] outputBuffers, int length)
+        public int Process(float[][] inputBuffers, float[][] outputBuffers, int length)
         {
             for (var ch = 0; ch < outputBuffers.Length; ch++)
             {
@@ -27,6 +27,8 @@ namespace Orcbolg.Dsp
                     buffer[t] *= gain;
                 }
             }
+
+            return 0;
         }
     }
 }
