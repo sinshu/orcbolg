@@ -47,11 +47,19 @@ namespace Orcbolg.Dsp
             }
             previous = current;
 
-
-            var newDspTime = (1 - weight) * dspTime + weight * (command.DspBufferEntry.DspEndTime - command.DspBufferEntry.DspStartTime).TotalSeconds;
+            var t = (command.DspBufferEntry.DspEndTime - command.DspBufferEntry.DspStartTime).TotalSeconds;
+            var newTime = t > dspTime ? t : (1 - weight) * dspTime + weight * t;
+            if (t > dspTime)
+            {
+                newTime = t;
+            }
+            else
+            {
+                newTime = weight * dspTime + (1 - weight) * t;
+            }
             lock (mutex)
             {
-                dspTime = newDspTime;
+                dspTime = newTime;
             }
         }
 
