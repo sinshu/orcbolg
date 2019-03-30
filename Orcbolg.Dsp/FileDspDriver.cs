@@ -24,6 +24,8 @@ namespace Orcbolg.Dsp
         private int startPosition;
         private int processLength;
 
+        private long processedSampleCount;
+
         private readonly int sampleRate;
         private readonly int inputChannelCount;
         private readonly int outputChannelCount;
@@ -50,6 +52,8 @@ namespace Orcbolg.Dsp
                 writeBuffer = null;
                 startPosition = 0;
                 processLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
+
+                processedSampleCount = 0;
 
                 this.sampleRate = reader.WaveFormat.SampleRate;
                 this.inputChannelCount = reader.WaveFormat.Channels;
@@ -86,6 +90,8 @@ namespace Orcbolg.Dsp
                 writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
                 startPosition = 0;
                 processLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
+
+                processedSampleCount = 0;
 
                 this.sampleRate = reader.WaveFormat.SampleRate;
                 this.inputChannelCount = reader.WaveFormat.Channels;
@@ -261,7 +267,6 @@ namespace Orcbolg.Dsp
             private DspBufferEntry entry;
             private List<IDspCommand> commandOutputBuffer;
             private List<IDspCommand> commandInputBuffer;
-            private long processedSampleCount;
 
             private Task completion;
 
@@ -272,7 +277,6 @@ namespace Orcbolg.Dsp
                 entry = new DspBufferEntry(driver.inputChannelCount, driver.outputChannelCount, driver.intervalLength);
                 commandOutputBuffer = new List<IDspCommand>();
                 commandInputBuffer = new List<IDspCommand>();
-                processedSampleCount = 0;
 
                 driver.state = DspState.Running;
 
@@ -338,7 +342,7 @@ namespace Orcbolg.Dsp
 
                     currentPosition += readLength;
 
-                    processedSampleCount += readLength;
+                    driver.processedSampleCount += readLength;
                 }
             }
 
@@ -351,7 +355,7 @@ namespace Orcbolg.Dsp
             {
                 get
                 {
-                    return processedSampleCount;
+                    return driver.processedSampleCount;
                 }
             }
 
