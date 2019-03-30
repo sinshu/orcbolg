@@ -104,7 +104,7 @@
             this.lblRecordingNumber.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.lblRecordingNumber.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lblRecordingNumber.ForeColor = System.Drawing.SystemColors.ControlLight;
-            this.lblRecordingNumber.Location = new System.Drawing.Point(88, 44);
+            this.lblRecordingNumber.Location = new System.Drawing.Point(88, 8);
             this.lblRecordingNumber.Name = "lblRecordingNumber";
             this.lblRecordingNumber.Padding = new System.Windows.Forms.Padding(4, 0, 0, 2);
             this.lblRecordingNumber.Size = new System.Drawing.Size(64, 28);
@@ -115,7 +115,7 @@
             // btnRecordingNumberIncrement
             // 
             this.btnRecordingNumberIncrement.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnRecordingNumberIncrement.Location = new System.Drawing.Point(124, 8);
+            this.btnRecordingNumberIncrement.Location = new System.Drawing.Point(124, 44);
             this.btnRecordingNumberIncrement.Name = "btnRecordingNumberIncrement";
             this.btnRecordingNumberIncrement.Size = new System.Drawing.Size(28, 28);
             this.btnRecordingNumberIncrement.TabIndex = 2;
@@ -126,7 +126,7 @@
             // btnRecordingNumberDecrement
             // 
             this.btnRecordingNumberDecrement.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnRecordingNumberDecrement.Location = new System.Drawing.Point(88, 8);
+            this.btnRecordingNumberDecrement.Location = new System.Drawing.Point(88, 44);
             this.btnRecordingNumberDecrement.Name = "btnRecordingNumberDecrement";
             this.btnRecordingNumberDecrement.Size = new System.Drawing.Size(28, 28);
             this.btnRecordingNumberDecrement.TabIndex = 1;
