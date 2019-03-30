@@ -40,6 +40,8 @@ namespace Orcbolg.Dsp
         private readonly int intervalLength;
         private readonly DspBuffer buffer;
 
+        private long processedSampleCount;
+
         private DspState state;
 
         public AsioDspDriver(AsioDspSetting setting)
@@ -111,6 +113,8 @@ namespace Orcbolg.Dsp
                 naDriverExt.SetChannelOffset(asioOutputChannelOffset, asioInputChannelOffset);
                 var entryCount = (int)Math.Ceiling((double)bufferLength / intervalLength);
                 buffer = new DspBuffer(asioInputChannelIndices.Length, asioOutputChannelIndices.Length, intervalLength, entryCount);
+
+                processedSampleCount = 0;
 
                 state = DspState.Initialized;
             }
@@ -257,7 +261,6 @@ namespace Orcbolg.Dsp
             private readonly Stopwatch stopwatch;
 
             private bool stopped;
-            private long processedSampleCount;
 
             private readonly Task completion;
 
@@ -269,7 +272,6 @@ namespace Orcbolg.Dsp
                 stopwatch = new Stopwatch();
 
                 stopped = false;
-                processedSampleCount = 0;
 
                 completion = Run();
             }
@@ -335,7 +337,7 @@ namespace Orcbolg.Dsp
                         e.Data["thrower"] = GetType().Name;
                         throw e;
                     }
-                    entry.Position = processedSampleCount;
+                    entry.Position = driver.processedSampleCount;
                     entry.DspStartTime = stopwatch.Elapsed;
 
                     for (var ch = 0; ch < driver.asioInputChannelIndices.Length; ch++)
@@ -355,7 +357,7 @@ namespace Orcbolg.Dsp
                         driver.writeDelegate(outputChannels[driver.asioOutputChannelIndices[ch]], entry.OutputInterval[ch], driver.intervalLength);
                     }
 
-                    Interlocked.Add(ref processedSampleCount, driver.intervalLength);
+                    Interlocked.Add(ref driver.processedSampleCount, driver.intervalLength);
 
                     entry.DspEndTime = stopwatch.Elapsed;
                     driver.buffer.EndWriting();
@@ -375,7 +377,7 @@ namespace Orcbolg.Dsp
             {
                 get
                 {
-                    return Interlocked.Read(ref processedSampleCount);
+                    return Interlocked.Read(ref driver.processedSampleCount);
                 }
             }
 

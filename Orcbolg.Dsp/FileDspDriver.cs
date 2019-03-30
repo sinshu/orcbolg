@@ -190,6 +190,8 @@ namespace Orcbolg.Dsp
                 writer.Dispose();
                 writer = null;
             }
+
+            state = DspState.Disposed;
         }
 
         private void CheckDisposed()
