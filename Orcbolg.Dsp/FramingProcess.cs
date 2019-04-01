@@ -33,9 +33,11 @@ namespace Orcbolg.Dsp
             this.action = action;
 
             buffer = new float[channelCount][];
+            frame = new float[channelCount][];
             for (var ch = 0; ch < channelCount; ch++)
             {
                 buffer[ch] = new float[frameLength];
+                frame[ch] = new float[frameLength];
             }
             processedSampleCount = 0;
             writeCount = 0;
@@ -48,7 +50,7 @@ namespace Orcbolg.Dsp
             {
                 for (var ch = 0; ch < channelCount; ch++)
                 {
-                    buffer[ch][writeCount] = interval[ch][writeCount];
+                    buffer[ch][writeCount] = interval[ch][t];
                 }
                 processedSampleCount++;
                 writeCount++;
