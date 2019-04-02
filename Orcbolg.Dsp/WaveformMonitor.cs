@@ -63,7 +63,7 @@ namespace Orcbolg.Dsp
             }
             if (drawCycle <= 0)
             {
-                throw new ArgumentException("Draw cycle must be greater than or equal to 1.");
+                throw new ArgumentException("Draw cycle must be greater than or equal to one.");
             }
 
             try

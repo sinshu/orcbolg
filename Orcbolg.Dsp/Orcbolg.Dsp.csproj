@@ -64,6 +64,7 @@
     <Compile Include="IntervalCommand.cs" />
     <Compile Include="IRealtimeDsp.cs" />
     <Compile Include="KeyDownCommand.cs" />
+    <Compile Include="MemoryDspDriver.cs" />
     <Compile Include="OutputGain.cs" />
     <Compile Include="OverlapAddProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
