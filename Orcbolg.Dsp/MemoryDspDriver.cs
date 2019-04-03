@@ -21,6 +21,9 @@ namespace Orcbolg.Dsp
         private readonly List<IRealtimeDsp> realtimeDsps;
         private readonly List<INonrealtimeDsp> nonrealtimeDsps;
 
+        private int startPosition;
+        private int processLength;
+
         private long processedSampleCount;
 
         private DspState state;
@@ -28,8 +31,8 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
-            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than or equal to one.");
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than or equal to one.");
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
             this.inputData = inputData;
             this.outputData = null;
@@ -42,6 +45,9 @@ namespace Orcbolg.Dsp
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
 
+            startPosition = 0;
+            processLength = dataLength;
+
             processedSampleCount = 0;
 
             state = DspState.Initialized;
@@ -51,8 +57,8 @@ namespace Orcbolg.Dsp
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
             if (outputData == null) throw new ArgumentNullException(nameof(outputData));
-            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than or equal to one.");
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than or equal to one.");
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
             this.inputData = inputData;
             this.outputData = outputData;
@@ -64,6 +70,9 @@ namespace Orcbolg.Dsp
 
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
+
+            startPosition = 0;
+            processLength = dataLength;
 
             processedSampleCount = 0;
 
@@ -92,6 +101,40 @@ namespace Orcbolg.Dsp
             }
 
             nonrealtimeDsps.Add(dsp);
+        }
+
+        public void SetStartPosition(int position)
+        {
+            CheckDisposed();
+
+            if (state == DspState.Running)
+            {
+                throw new InvalidOperationException("SetStartPosition method must be called when DSP is not running.");
+            }
+
+            if (!(0 <= position && position < dataLength))
+            {
+                throw new IndexOutOfRangeException(nameof(position));
+            }
+
+            startPosition = position;
+        }
+
+        public void SetLength(int length)
+        {
+            CheckDisposed();
+
+            if (state == DspState.Running)
+            {
+                throw new InvalidOperationException("SetLength method must be called when DSP is not running.");
+            }
+
+            if (length <= 0)
+            {
+                throw new ArgumentException("Length must be greater than zero.");
+            }
+
+            processLength = length;
         }
 
         public IDspContext Run()
@@ -204,15 +247,24 @@ namespace Orcbolg.Dsp
 
             private void Run()
             {
-                var currentPosition = 0;
+                var startPosition = driver.startPosition;
+                var endPosition = startPosition + driver.processLength;
+                if (endPosition > driver.dataLength)
+                {
+                    endPosition = driver.dataLength;
+                }
+
+                var currentPosition = startPosition;
 
                 while (true)
                 {
-                    var restLength = driver.dataLength - currentPosition;
+                    var restLength = endPosition - currentPosition;
                     if (restLength == 0)
                     {
                         break;
                     }
+
+                    entry.Position = driver.processedSampleCount;
 
                     var readLength = Math.Min(driver.intervalLength, restLength);
                     for (var ch = 0; ch < driver.inputChannelCount; ch++)

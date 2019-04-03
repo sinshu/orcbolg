@@ -35,7 +35,7 @@ namespace Orcbolg.Dsp
         public FileDspDriver(string inputFileName, int intervalLength)
         {
             if (inputFileName == null) throw new ArgumentNullException(nameof(inputFileName));
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than or equal to one.");
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
             try
             {
@@ -73,7 +73,7 @@ namespace Orcbolg.Dsp
             if (inputFileName == null) throw new ArgumentNullException(nameof(inputFileName));
             if (outputFileName == null) throw new ArgumentNullException(nameof(outputFileName));
             if (outputChannelCount <= 0) throw new ArgumentException("At least one output channel must be specified.");
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than or equal to one.");
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
             try
             {
@@ -158,7 +158,7 @@ namespace Orcbolg.Dsp
 
             if (length <= 0)
             {
-                throw new ArgumentException("Length must be greater than or equal to one.");
+                throw new ArgumentException("Length must be greater than zero.");
             }
 
             processLength = length;
@@ -308,9 +308,11 @@ namespace Orcbolg.Dsp
                         break;
                     }
 
+                    entry.Position = driver.processedSampleCount;
+
                     var readLength = Math.Min(driver.intervalLength, restLength);
-                    DspHelper.FillBuffer(driver.reader, driver.readBuffer, blockAlign * readLength);
-                    DspHelper.ReadInt16(driver.readBuffer, entry.InputInterval, readLength);
+                    RwHelper.FillBuffer(driver.reader, driver.readBuffer, blockAlign * readLength);
+                    RwHelper.ReadInt16(driver.readBuffer, entry.InputInterval, 0, readLength);
 
                     var value = 0;
                     foreach (var dsp in driver.realtimeDsps)
@@ -320,7 +322,7 @@ namespace Orcbolg.Dsp
                     entry.RealtimeDspReturnValue = value;
                     if (driver.writer != null)
                     {
-                        DspHelper.WriteInt16(entry.OutputInterval, driver.writeBuffer, readLength);
+                        RwHelper.WriteInt16(entry.OutputInterval, driver.writeBuffer, 0, readLength);
                         driver.writer.Write(driver.writeBuffer, 0, driver.writer.WaveFormat.BlockAlign * readLength);
                     }
 

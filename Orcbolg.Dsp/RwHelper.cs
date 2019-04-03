@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Orcbolg.Dsp
 {
-    internal static class DspHelper
+    internal static class RwHelper
     {
         public static int FillBuffer(Stream stream, byte[] buffer, int count)
         {
@@ -27,7 +27,7 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public static void ReadInt16(byte[] source, float[][] destination, int sampleCount)
+        public static void ReadInt16(byte[] source, float[][] destination, int sampleOffset, int sampleCount)
         {
             unsafe
             {
@@ -36,18 +36,18 @@ namespace Orcbolg.Dsp
                     var sp = (short*)bp;
                     for (var t = 0; t < sampleCount; t++)
                     {
-                        var offset = destination.Length * t;
+                        var shortOffset = destination.Length * t;
                         for (var ch = 0; ch < destination.Length; ch++)
                         {
-                            var value = sp[offset + ch];
-                            destination[ch][t] = (float)value / 0x8000;
+                            var value = sp[shortOffset + ch];
+                            destination[ch][sampleOffset + t] = (float)value / 0x8000;
                         }
                     }
                 }
             }
         }
 
-        public static void WriteInt16(float[][] source, byte[] destination, int sampleCount)
+        public static void WriteInt16(float[][] source, byte[] destination, int sampleOffset, int sampleCount)
         {
             unsafe
             {
@@ -56,10 +56,10 @@ namespace Orcbolg.Dsp
                     var sp = (short*)bp;
                     for (var t = 0; t < sampleCount; t++)
                     {
-                        var offset = source.Length * t;
+                        var shortOffset = source.Length * t;
                         for (var ch = 0; ch < source.Length; ch++)
                         {
-                            var value = (int)Math.Round(0x8000 * source[ch][t]);
+                            var value = (int)Math.Round(0x8000 * source[ch][sampleOffset + t]);
                             if (value < short.MinValue)
                             {
                                 value = short.MinValue;
@@ -68,7 +68,7 @@ namespace Orcbolg.Dsp
                             {
                                 value = short.MaxValue;
                             }
-                            sp[offset + ch] = (short)value;
+                            sp[shortOffset + ch] = (short)value;
                         }
                     }
                 }
