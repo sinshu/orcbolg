@@ -16,7 +16,8 @@ namespace Orcbolg.Dsp
         private readonly int intervalLength;
         private readonly int inputChannelCount;
         private readonly int outputChannelCount;
-        private readonly int dataLength;
+        private readonly int inputDataLength;
+        private readonly int outputDataLength;
 
         private readonly List<IRealtimeDsp> realtimeDsps;
         private readonly List<INonrealtimeDsp> nonrealtimeDsps;
@@ -31,6 +32,8 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
+            if (inputData.Any(x => x == null)) throw new ArgumentNullException("All input channels must not be null.");
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
             if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
             if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
@@ -40,13 +43,14 @@ namespace Orcbolg.Dsp
             this.intervalLength = intervalLength;
             inputChannelCount = inputData.Length;
             outputChannelCount = 0;
-            dataLength = inputData[0].Length;
+            inputDataLength = inputData[0].Length;
+            outputDataLength = 0;
 
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
 
             startPosition = 0;
-            processLength = dataLength;
+            processLength = inputDataLength;
 
             processedSampleCount = 0;
 
@@ -56,7 +60,11 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, float[][] outputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
+            if (inputData.Any(x => x == null)) throw new ArgumentNullException("All input channels must not be null.");
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
             if (outputData == null) throw new ArgumentNullException(nameof(outputData));
+            if (outputData.Any(x => x == null)) throw new ArgumentNullException("All output channels must not be null.");
+            if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All output channels must have the same length.");
             if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
             if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
 
@@ -66,13 +74,14 @@ namespace Orcbolg.Dsp
             this.intervalLength = intervalLength;
             inputChannelCount = inputData.Length;
             outputChannelCount = outputData.Length;
-            dataLength = inputData[0].Length;
+            inputDataLength = inputData[0].Length;
+            outputDataLength = outputData[0].Length;
 
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
 
             startPosition = 0;
-            processLength = dataLength;
+            processLength = inputDataLength;
 
             processedSampleCount = 0;
 
@@ -85,7 +94,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             realtimeDsps.Add(dsp);
@@ -97,7 +106,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             nonrealtimeDsps.Add(dsp);
@@ -109,10 +118,10 @@ namespace Orcbolg.Dsp
 
             if (state == DspState.Running)
             {
-                throw new InvalidOperationException("SetStartPosition method must be called when DSP is not running.");
+                throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
             }
 
-            if (!(0 <= position && position < dataLength))
+            if (!(0 <= position && position < inputDataLength))
             {
                 throw new IndexOutOfRangeException(nameof(position));
             }
@@ -120,13 +129,13 @@ namespace Orcbolg.Dsp
             startPosition = position;
         }
 
-        public void SetLength(int length)
+        public void SetProcessLength(int length)
         {
             CheckDisposed();
 
             if (state == DspState.Running)
             {
-                throw new InvalidOperationException("SetLength method must be called when DSP is not running.");
+                throw new InvalidOperationException("SetProcessLength must be called when the driver is not running.");
             }
 
             if (length <= 0)
@@ -148,7 +157,7 @@ namespace Orcbolg.Dsp
             }
             else
             {
-                throw new InvalidOperationException("Run method must be called when DSP is not running.");
+                throw new InvalidOperationException("Run must be called when the driver is not running.");
             }
         }
 
@@ -247,14 +256,18 @@ namespace Orcbolg.Dsp
 
             private void Run()
             {
-                var startPosition = driver.startPosition;
-                var endPosition = startPosition + driver.processLength;
-                if (endPosition > driver.dataLength)
+                if (driver.outputData != null && driver.processLength > driver.outputDataLength)
                 {
-                    endPosition = driver.dataLength;
+                    throw new IndexOutOfRangeException("Output buffer length is not sufficient.");
                 }
 
-                var currentPosition = startPosition;
+                var endPosition = driver.startPosition + driver.processLength;
+                if (endPosition > driver.inputDataLength)
+                {
+                    throw new IndexOutOfRangeException("Start position or process length is too big.");
+                }
+
+                var currentPosition = driver.startPosition;
 
                 while (true)
                 {

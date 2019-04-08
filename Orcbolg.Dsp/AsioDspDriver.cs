@@ -136,7 +136,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             realtimeDsps.Add(dsp);
@@ -148,7 +148,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             nonrealtimeDsps.Add(dsp);
@@ -164,7 +164,7 @@ namespace Orcbolg.Dsp
             }
             else
             {
-                throw new InvalidOperationException("Run method must be called when DSP is not running.");
+                throw new InvalidOperationException("Run must be called when the driver is not running.");
             }
         }
 
@@ -291,7 +291,7 @@ namespace Orcbolg.Dsp
                     scheduler.Start();
                     await scheduler.RealtimeDspCompletion;
 
-                    // Since the driver might be disposed while awaiting, the null check is necessary.
+                    // Since the driver might be disposed while awaiting, this null check is necessary.
                     if (driver.naDriverExt != null)
                     {
                         driver.naDriverExt.Stop();

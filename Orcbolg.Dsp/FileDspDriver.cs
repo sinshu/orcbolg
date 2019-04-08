@@ -21,6 +21,7 @@ namespace Orcbolg.Dsp
         private byte[] readBuffer;
         private WaveFileWriter writer;
         private byte[] writeBuffer;
+        private int dataLength;
         private int startPosition;
         private int processLength;
 
@@ -50,8 +51,9 @@ namespace Orcbolg.Dsp
                 readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
                 writer = null;
                 writeBuffer = null;
+                dataLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
                 startPosition = 0;
-                processLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
+                processLength = dataLength;
 
                 processedSampleCount = 0;
 
@@ -88,8 +90,9 @@ namespace Orcbolg.Dsp
                 readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
                 writer = new WaveFileWriter(outputFileName, new WaveFormat(reader.WaveFormat.SampleRate, 16, outputChannelCount));
                 writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
+                dataLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
                 startPosition = 0;
-                processLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
+                processLength = dataLength;
 
                 processedSampleCount = 0;
 
@@ -112,7 +115,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             realtimeDsps.Add(dsp);
@@ -124,7 +127,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp method must be called before Run method is called.");
+                throw new InvalidOperationException("AddDsp must be called before Run is called.");
             }
 
             nonrealtimeDsps.Add(dsp);
@@ -136,10 +139,10 @@ namespace Orcbolg.Dsp
 
             if (state == DspState.Running)
             {
-                throw new InvalidOperationException("SetStartPosition method must be called when DSP is not running.");
+                throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
             }
 
-            if (!(0 <= position && position < reader.Length / reader.BlockAlign))
+            if (!(0 <= position && position < dataLength))
             {
                 throw new IndexOutOfRangeException(nameof(position));
             }
@@ -147,13 +150,13 @@ namespace Orcbolg.Dsp
             startPosition = position;
         }
 
-        public void SetLength(int length)
+        public void SetProcessLength(int length)
         {
             CheckDisposed();
 
             if (state == DspState.Running)
             {
-                throw new InvalidOperationException("SetLength method must be called when DSP is not running.");
+                throw new InvalidOperationException("SetProcessLength must be called when the driver is not running.");
             }
 
             if (length <= 0)
@@ -175,7 +178,7 @@ namespace Orcbolg.Dsp
             }
             else
             {
-                throw new InvalidOperationException("Run method must be called when DSP is not running.");
+                throw new InvalidOperationException("Run must be called when the driver is not running.");
             }
         }
 
@@ -287,22 +290,18 @@ namespace Orcbolg.Dsp
             {
                 var blockAlign = driver.reader.WaveFormat.BlockAlign;
 
-                var startPosition = driver.startPosition;
-                var endPosition = startPosition + driver.processLength;
-                var sourceLength = (int)(driver.reader.Length / blockAlign);
-                if (endPosition > sourceLength)
+                var endPosition = driver.startPosition + driver.processLength;
+                if (endPosition > driver.dataLength)
                 {
-                    endPosition = sourceLength;
+                    throw new IndexOutOfRangeException("Start position or process length is too big.");
                 }
-                var processLength = endPosition - startPosition;
 
                 var currentPosition = 0;
-
-                driver.reader.Seek(blockAlign * startPosition, SeekOrigin.Begin);
+                driver.reader.Seek(blockAlign * driver.startPosition, SeekOrigin.Begin);
 
                 while (true)
                 {
-                    var restLength = processLength - currentPosition;
+                    var restLength = driver.processLength - currentPosition;
                     if (restLength == 0)
                     {
                         break;

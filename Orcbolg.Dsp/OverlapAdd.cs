@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Orcbolg.Dsp
 {
-    public sealed class OverlapAddProcess
+    public sealed class OverlapAdd
     {
         private readonly int inputChannelCount;
         private readonly int outputChannelCount;
@@ -25,7 +25,7 @@ namespace Orcbolg.Dsp
         private int outputAddPosition;
         private int shiftCount;
 
-        public OverlapAddProcess(int inputChannelCount, int outputChannelCount, int frameLength, int frameShift, FrameFunc func)
+        public OverlapAdd(int inputChannelCount, int outputChannelCount, int frameLength, int frameShift, FrameFunc func)
         {
             if (inputChannelCount <= 0) throw new ArgumentException("Number of input channels must be greater than or equal to one.");
             if (outputChannelCount <= 0) throw new ArgumentException("Number of output channels must be greater than or equal to one.");

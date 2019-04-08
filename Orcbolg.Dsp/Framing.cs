@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Orcbolg.Dsp
 {
-    public sealed class FramingProcess
+    public sealed class Framing
     {
         private readonly int channelCount;
         private readonly int frameLength;
@@ -19,7 +19,7 @@ namespace Orcbolg.Dsp
         private int writeCount;
         private int shiftCount;
 
-        public FramingProcess(int channelCount, int frameLength, int frameShift, FrameAction action)
+        public Framing(int channelCount, int frameLength, int frameShift, FrameAction action)
         {
             if (channelCount <= 0) throw new ArgumentException("Number of channels must be greater than or equal to one.");
             if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.");
