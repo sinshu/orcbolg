@@ -22,8 +22,8 @@ namespace Orcbolg.Dsp
         private WaveFileWriter writer;
         private byte[] writeBuffer;
         private int dataLength;
-        private int startPosition;
-        private int processLength;
+        private int sampleOffset;
+        private int sampleCount;
 
         private long processedSampleCount;
 
@@ -52,8 +52,8 @@ namespace Orcbolg.Dsp
                 writer = null;
                 writeBuffer = null;
                 dataLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
-                startPosition = 0;
-                processLength = dataLength;
+                sampleOffset = 0;
+                sampleCount = dataLength;
 
                 processedSampleCount = 0;
 
@@ -91,8 +91,8 @@ namespace Orcbolg.Dsp
                 writer = new WaveFileWriter(outputFileName, new WaveFormat(reader.WaveFormat.SampleRate, 16, outputChannelCount));
                 writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
                 dataLength = (int)(reader.Length / reader.WaveFormat.BlockAlign);
-                startPosition = 0;
-                processLength = dataLength;
+                sampleOffset = 0;
+                sampleCount = dataLength;
 
                 processedSampleCount = 0;
 
@@ -133,7 +133,7 @@ namespace Orcbolg.Dsp
             nonrealtimeDsps.Add(dsp);
         }
 
-        public void SetStartPosition(int position)
+        public void SetSpan(int sampleOffset, int sampleCount)
         {
             CheckDisposed();
 
@@ -142,29 +142,18 @@ namespace Orcbolg.Dsp
                 throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
             }
 
-            if (!(0 <= position && position < dataLength))
+            if (!(0 <= sampleOffset && sampleOffset < dataLength))
             {
-                throw new IndexOutOfRangeException(nameof(position));
+                throw new IndexOutOfRangeException(nameof(sampleOffset));
             }
 
-            startPosition = position;
-        }
-
-        public void SetProcessLength(int length)
-        {
-            CheckDisposed();
-
-            if (state == DspState.Running)
+            if (sampleOffset + sampleCount > dataLength)
             {
-                throw new InvalidOperationException("SetProcessLength must be called when the driver is not running.");
+                throw new IndexOutOfRangeException("Sample offset or count is too big.");
             }
 
-            if (length <= 0)
-            {
-                throw new ArgumentException("Length must be greater than zero.");
-            }
-
-            processLength = length;
+            this.sampleOffset = sampleOffset;
+            this.sampleCount = sampleCount;
         }
 
         public IDspContext Run()
@@ -290,18 +279,12 @@ namespace Orcbolg.Dsp
             {
                 var blockAlign = driver.reader.WaveFormat.BlockAlign;
 
-                var endPosition = driver.startPosition + driver.processLength;
-                if (endPosition > driver.dataLength)
-                {
-                    throw new IndexOutOfRangeException("Start position or process length is too big.");
-                }
-
                 var currentPosition = 0;
-                driver.reader.Seek(blockAlign * driver.startPosition, SeekOrigin.Begin);
+                driver.reader.Seek(blockAlign * driver.sampleOffset, SeekOrigin.Begin);
 
                 while (true)
                 {
-                    var restLength = driver.processLength - currentPosition;
+                    var restLength = driver.sampleCount - currentPosition;
                     if (restLength == 0)
                     {
                         break;

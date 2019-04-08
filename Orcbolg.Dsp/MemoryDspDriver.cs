@@ -22,8 +22,8 @@ namespace Orcbolg.Dsp
         private readonly List<IRealtimeDsp> realtimeDsps;
         private readonly List<INonrealtimeDsp> nonrealtimeDsps;
 
-        private int startPosition;
-        private int processLength;
+        private int sampleOffset;
+        private int sampleCount;
 
         private long processedSampleCount;
 
@@ -49,8 +49,8 @@ namespace Orcbolg.Dsp
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-            startPosition = 0;
-            processLength = inputDataLength;
+            sampleOffset = 0;
+            sampleCount = inputDataLength;
 
             processedSampleCount = 0;
 
@@ -80,8 +80,8 @@ namespace Orcbolg.Dsp
             realtimeDsps = new List<IRealtimeDsp>();
             nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-            startPosition = 0;
-            processLength = inputDataLength;
+            sampleOffset = 0;
+            sampleCount = Math.Min(inputDataLength, outputDataLength);
 
             processedSampleCount = 0;
 
@@ -112,7 +112,7 @@ namespace Orcbolg.Dsp
             nonrealtimeDsps.Add(dsp);
         }
 
-        public void SetStartPosition(int position)
+        public void SetSpan(int sampleOffset, int sampleCount)
         {
             CheckDisposed();
 
@@ -121,29 +121,23 @@ namespace Orcbolg.Dsp
                 throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
             }
 
-            if (!(0 <= position && position < inputDataLength))
+            if (!(0 <= sampleOffset && sampleOffset < inputDataLength))
             {
-                throw new IndexOutOfRangeException(nameof(position));
+                throw new IndexOutOfRangeException(nameof(sampleOffset));
             }
 
-            startPosition = position;
-        }
-
-        public void SetProcessLength(int length)
-        {
-            CheckDisposed();
-
-            if (state == DspState.Running)
+            if (sampleOffset + sampleCount > inputDataLength)
             {
-                throw new InvalidOperationException("SetProcessLength must be called when the driver is not running.");
+                throw new IndexOutOfRangeException("Sample offset or count is too big.");
             }
 
-            if (length <= 0)
+            if (outputData != null && sampleCount > outputDataLength)
             {
-                throw new ArgumentException("Length must be greater than zero.");
+                throw new IndexOutOfRangeException("Output buffer length is not sufficient.");
             }
 
-            processLength = length;
+            this.sampleOffset = sampleOffset;
+            this.sampleCount = sampleCount;
         }
 
         public IDspContext Run()
@@ -256,18 +250,9 @@ namespace Orcbolg.Dsp
 
             private void Run()
             {
-                if (driver.outputData != null && driver.processLength > driver.outputDataLength)
-                {
-                    throw new IndexOutOfRangeException("Output buffer length is not sufficient.");
-                }
+                var endPosition = driver.sampleOffset + driver.sampleCount;
 
-                var endPosition = driver.startPosition + driver.processLength;
-                if (endPosition > driver.inputDataLength)
-                {
-                    throw new IndexOutOfRangeException("Start position or process length is too big.");
-                }
-
-                var currentPosition = driver.startPosition;
+                var currentPosition = driver.sampleOffset;
 
                 while (true)
                 {
