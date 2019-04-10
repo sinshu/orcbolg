@@ -33,9 +33,22 @@ namespace Orcbolg.Dsp
             }
         }
 
+        public static float[][] Read(string filename, int sampleOffset, int sampleCount)
+        {
+            if (filename == null) throw new ArgumentNullException(nameof(filename));
+            if (sampleOffset < 0) throw new ArgumentException("Sample offset must be greater than or equal to zero.");
+            if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
+            using (var reader = new WaveFileReader(filename))
+            {
+                return ReadSub(reader, sampleOffset, sampleCount);
+            }
+        }
+
         public static float[][] Read(string filename, int sampleOffset, int sampleCount, out int sampleRate)
         {
             if (filename == null) throw new ArgumentNullException(nameof(filename));
+            if (sampleOffset < 0) throw new ArgumentException("Sample offset must be greater than or equal to zero.");
+            if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
             using (var reader = new WaveFileReader(filename))
             {
                 sampleRate = reader.WaveFormat.SampleRate;
@@ -91,6 +104,8 @@ namespace Orcbolg.Dsp
             if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All channels must have the same length.");
             if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
             if (filename == null) throw new ArgumentNullException(nameof(filename));
+            if (sampleOffset < 0) throw new ArgumentException("Sample offset must be greater than or equal to zero.");
+            if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
 
             var format = new WaveFormat(sampleRate, 16, data.Length);
             using (var writer = new WaveFileWriter(filename, format))
