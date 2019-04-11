@@ -144,12 +144,12 @@ namespace Orcbolg.Dsp
 
             if (!(0 <= sampleOffset && sampleOffset < dataLength))
             {
-                throw new IndexOutOfRangeException(nameof(sampleOffset));
+                throw new ArgumentOutOfRangeException(nameof(sampleOffset));
             }
 
             if (sampleOffset + sampleCount > dataLength)
             {
-                throw new IndexOutOfRangeException("Sample offset or count is too big.");
+                throw new ArgumentException("Sample offset or count is too big.");
             }
 
             this.sampleOffset = sampleOffset;

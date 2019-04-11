@@ -19,13 +19,13 @@ namespace Orcbolg.Dsp
             outputToInputChannel = new int[outputChannelCount];
         }
 
-        public int Process(float[][] inputBuffers, float[][] outputBuffers, int length)
+        public int Process(float[][] inputInterval, float[][] outputInterval, int length)
         {
-            for (var ch = 0; ch < outputBuffers.Length; ch++)
+            for (var ch = 0; ch < outputInterval.Length; ch++)
             {
                 var inputChannel = outputToInputChannel[ch];
-                var inputBuffer = inputBuffers[inputChannel];
-                var outputBuffer = outputBuffers[ch];
+                var inputBuffer = inputInterval[inputChannel];
+                var outputBuffer = outputInterval[ch];
                 for (var t = 0; t < length; t++)
                 {
                     outputBuffer[t] = inputBuffer[t];
@@ -39,11 +39,11 @@ namespace Orcbolg.Dsp
         {
             if (!(0 <= inputChannel && inputChannel < inputChannelCount))
             {
-                throw new IndexOutOfRangeException(nameof(inputChannel));
+                throw new ArgumentOutOfRangeException(nameof(inputChannel));
             }
             if (!(0 <= outputChannel && outputChannel < outputChannelCount))
             {
-                throw new IndexOutOfRangeException(nameof(outputChannel));
+                throw new ArgumentOutOfRangeException(nameof(outputChannel));
             }
 
             outputToInputChannel[outputChannel] = inputChannel;

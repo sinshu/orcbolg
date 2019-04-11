@@ -32,7 +32,7 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
-            if (inputData.Any(x => x == null)) throw new ArgumentNullException("All input channels must not be null.");
+            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.");
             if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
             if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
             if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
@@ -60,10 +60,10 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, float[][] outputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
-            if (inputData.Any(x => x == null)) throw new ArgumentNullException("All input channels must not be null.");
+            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.");
             if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
             if (outputData == null) throw new ArgumentNullException(nameof(outputData));
-            if (outputData.Any(x => x == null)) throw new ArgumentNullException("All output channels must not be null.");
+            if (outputData.Any(x => x == null)) throw new ArgumentException("All output channels must not be null.");
             if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All output channels must have the same length.");
             if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
             if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
@@ -123,17 +123,17 @@ namespace Orcbolg.Dsp
 
             if (!(0 <= sampleOffset && sampleOffset < inputDataLength))
             {
-                throw new IndexOutOfRangeException(nameof(sampleOffset));
+                throw new ArgumentOutOfRangeException(nameof(sampleOffset));
             }
 
             if (sampleOffset + sampleCount > inputDataLength)
             {
-                throw new IndexOutOfRangeException("Sample offset or count is too big.");
+                throw new ArgumentException("Sample offset or count is too big.");
             }
 
             if (outputData != null && sampleCount > outputDataLength)
             {
-                throw new IndexOutOfRangeException("Output buffer length is not sufficient.");
+                throw new ArgumentException("Output buffer length is not sufficient.");
             }
 
             this.sampleOffset = sampleOffset;

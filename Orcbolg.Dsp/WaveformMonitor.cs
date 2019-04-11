@@ -361,7 +361,6 @@ namespace Orcbolg.Dsp
                 }
                 if (min <= -0.999F)
                 {
-                    var y = (int)Math.Floor(0.5F * top + 0.5F * bottom);
                     ui_g.FillRectangle(clipColor, ui_x, (bottom + top) / 2, 1, bottom - middle);
                 }
 

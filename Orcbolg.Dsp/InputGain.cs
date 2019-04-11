@@ -11,17 +11,18 @@ namespace Orcbolg.Dsp
         public InputGain(IDspDriver driver, IReadOnlyList<float> gains)
         {
             if (driver == null) throw new ArgumentNullException(nameof(driver));
+            if (gains == null) throw new ArgumentNullException(nameof(gains));
             if (gains.Count != driver.InputChannelCount) throw new ArgumentException("Number of gains must be equal to number of input channels.");
 
             this.gains = gains.ToArray();
         }
 
-        public int Process(float[][] inputBuffers, float[][] outputBuffers, int length)
+        public int Process(float[][] inputInterval, float[][] outputInterval, int length)
         {
-            for (var ch = 0; ch < inputBuffers.Length; ch++)
+            for (var ch = 0; ch < inputInterval.Length; ch++)
             {
                 var gain = gains[ch];
-                var buffer = inputBuffers[ch];
+                var buffer = inputInterval[ch];
                 for (var t = 0; t < length; t++)
                 {
                     buffer[t] *= gain;
