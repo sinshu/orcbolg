@@ -245,64 +245,71 @@ namespace Orcbolg.Dsp
 
                 driver.state = DspState.Running;
 
-                completion = Task.Run((Action)Run).ContinueWith(task => driver.state = DspState.Stop);
+                completion = Task.Run((Action)Run);
             }
 
             private void Run()
             {
-                var endPosition = driver.sampleOffset + driver.sampleCount;
-
-                var currentPosition = driver.sampleOffset;
-
-                while (true)
+                try
                 {
-                    var restLength = endPosition - currentPosition;
-                    if (restLength == 0)
-                    {
-                        break;
-                    }
+                    var endPosition = driver.sampleOffset + driver.sampleCount;
 
-                    entry.Position = driver.processedSampleCount;
+                    var currentPosition = driver.sampleOffset;
 
-                    var readLength = Math.Min(driver.intervalLength, restLength);
-                    for (var ch = 0; ch < driver.inputChannelCount; ch++)
+                    while (true)
                     {
-                        Array.Copy(driver.inputData[ch], currentPosition, entry.InputInterval[ch], 0, readLength);
-                    }
-
-                    var value = 0;
-                    foreach (var dsp in driver.realtimeDsps)
-                    {
-                        value = dsp.Process(entry.InputInterval, entry.OutputInterval, readLength);
-                    }
-                    entry.RealtimeDspReturnValue = value;
-                    if (driver.outputData != null)
-                    {
-                        for (var ch = 0; ch < driver.outputChannelCount; ch++)
+                        var restLength = endPosition - currentPosition;
+                        if (restLength == 0)
                         {
-                            Array.Copy(entry.OutputInterval[ch], 0, driver.outputData[ch], currentPosition, readLength);
+                            break;
                         }
-                    }
 
-                    var intervalCommand = new IntervalCommand(entry, readLength);
-                    Post(intervalCommand);
-                    while (commandOutputBuffer.Count > 0)
-                    {
-                        commandInputBuffer.AddRange(commandOutputBuffer);
-                        commandOutputBuffer.Clear();
-                        foreach (var command in commandInputBuffer)
+                        entry.Position = driver.processedSampleCount;
+
+                        var readLength = Math.Min(driver.intervalLength, restLength);
+                        for (var ch = 0; ch < driver.inputChannelCount; ch++)
                         {
-                            foreach (var dsp in driver.nonrealtimeDsps)
+                            Array.Copy(driver.inputData[ch], currentPosition, entry.InputInterval[ch], 0, readLength);
+                        }
+
+                        var value = 0;
+                        foreach (var dsp in driver.realtimeDsps)
+                        {
+                            value = dsp.Process(entry.InputInterval, entry.OutputInterval, readLength);
+                        }
+                        entry.RealtimeDspReturnValue = value;
+                        if (driver.outputData != null)
+                        {
+                            for (var ch = 0; ch < driver.outputChannelCount; ch++)
                             {
-                                dsp.Process(this, command);
+                                Array.Copy(entry.OutputInterval[ch], 0, driver.outputData[ch], currentPosition, readLength);
                             }
                         }
-                        commandInputBuffer.Clear();
+
+                        var intervalCommand = new IntervalCommand(entry, readLength);
+                        Post(intervalCommand);
+                        while (commandOutputBuffer.Count > 0)
+                        {
+                            commandInputBuffer.AddRange(commandOutputBuffer);
+                            commandOutputBuffer.Clear();
+                            foreach (var command in commandInputBuffer)
+                            {
+                                foreach (var dsp in driver.nonrealtimeDsps)
+                                {
+                                    dsp.Process(this, command);
+                                }
+                            }
+                            commandInputBuffer.Clear();
+                        }
+
+                        currentPosition += readLength;
+
+                        driver.processedSampleCount += readLength;
                     }
-
-                    currentPosition += readLength;
-
-                    driver.processedSampleCount += readLength;
+                }
+                finally
+                {
+                    driver.state = DspState.Stop;
                 }
             }
 
