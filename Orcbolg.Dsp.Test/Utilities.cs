@@ -30,10 +30,7 @@ namespace Orcbolg.Dsp.Test
 
         public static void AreEqual(float[] expected, float[] actual)
         {
-            if (actual.Length != expected.Length)
-            {
-                Assert.Fail("actual.Length != expected.Length");
-            }
+            Assert.IsTrue(actual.Length == expected.Length);
 
             for (var i = 0; i < actual.Length; i++)
             {
