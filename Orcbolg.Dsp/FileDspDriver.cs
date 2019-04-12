@@ -142,7 +142,7 @@ namespace Orcbolg.Dsp
                 throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
             }
 
-            if (!(0 <= sampleOffset && sampleOffset < dataLength))
+            if (!(0 <= sampleOffset && sampleOffset <= dataLength))
             {
                 throw new ArgumentOutOfRangeException(nameof(sampleOffset));
             }
