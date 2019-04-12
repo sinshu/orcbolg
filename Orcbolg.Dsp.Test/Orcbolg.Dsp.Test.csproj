@@ -51,7 +51,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OverlapAddTest.cs" />
     <Compile Include="FileDspDriverTest.cs" />
+    <Compile Include="FramingTest.cs" />
     <Compile Include="MemoryDspDriverTest.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="WaveFileTest.cs" />
@@ -76,6 +78,9 @@
     <None Include="cases\FileDspDriverTest.Write3.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="cases\FramingTest.Test.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="cases\MemoryDspDriverTest.Read1.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -86,6 +91,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="cases\MemoryDspDriverTest.Write2.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="cases\OverlapAddTest.Test.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="cases\WaveFileTest.SampleRate.csv">
