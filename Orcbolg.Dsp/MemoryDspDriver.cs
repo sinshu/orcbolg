@@ -254,11 +254,11 @@ namespace Orcbolg.Dsp
                 {
                     var endPosition = driver.sampleOffset + driver.sampleCount;
 
-                    var currentPosition = driver.sampleOffset;
+                    var currentPosition = 0;
 
                     while (true)
                     {
-                        var restLength = endPosition - currentPosition;
+                        var restLength = driver.sampleCount - currentPosition;
                         if (restLength == 0)
                         {
                             break;
@@ -269,7 +269,7 @@ namespace Orcbolg.Dsp
                         var readLength = Math.Min(driver.intervalLength, restLength);
                         for (var ch = 0; ch < driver.inputChannelCount; ch++)
                         {
-                            Array.Copy(driver.inputData[ch], currentPosition, entry.InputInterval[ch], 0, readLength);
+                            Array.Copy(driver.inputData[ch], driver.sampleOffset + currentPosition, entry.InputInterval[ch], 0, readLength);
                         }
 
                         var value = 0;
