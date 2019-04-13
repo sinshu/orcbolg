@@ -40,6 +40,9 @@ namespace Orcbolg.Dsp
             if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
             using (var reader = new WaveFileReader(fileName))
             {
+                var dataLength = (int)(reader.Length / reader.BlockAlign);
+                var endPosition = sampleOffset + sampleCount;
+                if (endPosition > dataLength) throw new ArgumentException("Sample offset or count is too big.");
                 return ReadSub(reader, sampleOffset, sampleCount);
             }
         }
@@ -51,6 +54,42 @@ namespace Orcbolg.Dsp
             if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
             using (var reader = new WaveFileReader(fileName))
             {
+                var dataLength = (int)(reader.Length / reader.BlockAlign);
+                var endPosition = sampleOffset + sampleCount;
+                if (endPosition > dataLength) throw new ArgumentException("Sample offset or count is too big.");
+                sampleRate = reader.WaveFormat.SampleRate;
+                return ReadSub(reader, sampleOffset, sampleCount);
+            }
+        }
+
+        public static float[][] Read(string fileName, TimeSpan offset, TimeSpan length)
+        {
+            if (fileName == null) throw new ArgumentNullException(nameof(fileName));
+            using (var reader = new WaveFileReader(fileName))
+            {
+                var sampleOffset = (int)Math.Round(reader.WaveFormat.SampleRate * offset.TotalSeconds);
+                var endPosition = (int)Math.Round(reader.WaveFormat.SampleRate * (offset.TotalSeconds + length.TotalSeconds));
+                var sampleCount = endPosition - sampleOffset;
+                if (sampleOffset < 0) throw new ArgumentException("Offset must be greater than or equal to zero.");
+                if (sampleCount < 0) throw new ArgumentException("Length must be greater than or equal to zero.");
+                var dataLength = (int)(reader.Length / reader.BlockAlign);
+                if (endPosition > dataLength) throw new ArgumentException("Offset or length is too big.");
+                return ReadSub(reader, sampleOffset, sampleCount);
+            }
+        }
+
+        public static float[][] Read(string fileName, TimeSpan offset, TimeSpan length, out int sampleRate)
+        {
+            if (fileName == null) throw new ArgumentNullException(nameof(fileName));
+            using (var reader = new WaveFileReader(fileName))
+            {
+                var sampleOffset = (int)Math.Round(reader.WaveFormat.SampleRate * offset.TotalSeconds);
+                var endPosition = (int)Math.Round(reader.WaveFormat.SampleRate * (offset.TotalSeconds + length.TotalSeconds));
+                var sampleCount = endPosition - sampleOffset;
+                if (sampleOffset < 0) throw new ArgumentException("Offset must be greater than or equal to zero.");
+                if (sampleCount < 0) throw new ArgumentException("Length must be greater than or equal to zero.");
+                var dataLength = (int)(reader.Length / reader.BlockAlign);
+                if (endPosition > dataLength) throw new ArgumentException("Offset or length is too big.");
                 sampleRate = reader.WaveFormat.SampleRate;
                 return ReadSub(reader, sampleOffset, sampleCount);
             }
@@ -60,8 +99,6 @@ namespace Orcbolg.Dsp
         {
             var dataLength = (int)(reader.Length / reader.BlockAlign);
             var endPosition = sampleOffset + sampleCount;
-            if (endPosition > dataLength) throw new ArgumentException("Sample offset or count is too big.");
-
             var processLength = endPosition - sampleOffset;
 
             var buffer = new byte[reader.BlockAlign * bufferLength];
@@ -93,8 +130,10 @@ namespace Orcbolg.Dsp
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All channels must not be null.");
-
-            Write(data, sampleRate, fileName, 0, data[0].Length);
+            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All channels must have the same length.");
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
+            if (fileName == null) throw new ArgumentNullException(nameof(fileName));
+            WriteSub(data, sampleRate, fileName, 0, data[0].Length);
         }
 
         public static void Write(float[][] data, int sampleRate, string fileName, int sampleOffset, int sampleCount)
@@ -106,25 +145,41 @@ namespace Orcbolg.Dsp
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             if (sampleOffset < 0) throw new ArgumentException("Sample offset must be greater than or equal to zero.");
             if (sampleCount < 0) throw new ArgumentException("Sample count must be greater than or equal to zero.");
+            if (sampleOffset + sampleCount > data[0].Length) throw new ArgumentException("Sample offset or count is too big.");
+            WriteSub(data, sampleRate, fileName, sampleOffset, sampleCount);
+        }
 
+        public static void Write(float[][] data, int sampleRate, string fileName, TimeSpan offset, TimeSpan length)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.Any(x => x == null)) throw new ArgumentException("All channels must not be null.");
+            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All channels must have the same length.");
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
+            if (fileName == null) throw new ArgumentNullException(nameof(fileName));
+            var sampleOffset = (int)Math.Round(sampleRate * offset.TotalSeconds);
+            var endPosition = (int)Math.Round(sampleRate * (offset.TotalSeconds + length.TotalSeconds));
+            if (endPosition > data[0].Length) throw new ArgumentException("Sample offset or count is too big.");
+            var sampleCount = endPosition - sampleOffset;
+            WriteSub(data, sampleRate, fileName, sampleOffset, sampleCount);
+        }
+
+        private static void WriteSub(float[][] data, int sampleRate, string fileName, int sampleOffset, int sampleCount)
+        {
             var format = new WaveFormat(sampleRate, 16, data.Length);
             using (var writer = new WaveFileWriter(fileName, format))
             {
                 var dataLength = data[0].Length;
                 var endPosition = sampleOffset + sampleCount;
-                if (endPosition > dataLength) throw new ArgumentException("Sample offset or count is too big.");
-
                 var buffer = new byte[format.BlockAlign * bufferLength];
-
-                var currentPosition = sampleOffset;
+                var currentPosition = 0;
                 while (true)
                 {
-                    var restLength = endPosition - currentPosition;
+                    var restLength = sampleCount - currentPosition;
                     var writeLength = Math.Min(bufferLength, restLength);
-                    RwHelper.WriteInt16(data, buffer, currentPosition, writeLength);
+                    RwHelper.WriteInt16(data, buffer, sampleOffset + currentPosition, writeLength);
                     writer.Write(buffer, 0, format.BlockAlign * writeLength);
                     currentPosition += writeLength;
-                    if (currentPosition == endPosition)
+                    if (currentPosition == sampleCount)
                     {
                         break;
                     }

@@ -32,7 +32,7 @@ namespace Orcbolg.Dsp.Test
                 {
                     WaveFile.Write(data, sampleRate, "test.wav", sampleOffset, sampleCount);
                 }
-                catch
+                catch (ArgumentException)
                 {
                     Assert.IsTrue(error == 1);
                     continue;
@@ -75,7 +75,7 @@ namespace Orcbolg.Dsp.Test
                 {
                     actual = WaveFile.Read("test.wav", sampleOffset, sampleCount);
                 }
-                catch
+                catch (ArgumentException)
                 {
                     Assert.IsTrue(error == 1);
                     continue;
