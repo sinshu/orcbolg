@@ -93,7 +93,10 @@
     <None Include="cases\MemoryDspDriverTest.Write2.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="cases\OverlapAddTest.Test.csv">
+    <None Include="cases\OverlapAddTest.Test1.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="cases\OverlapAddTest.Test2.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="cases\WaveFileTest.SampleRate.csv">

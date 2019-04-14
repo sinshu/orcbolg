@@ -16,8 +16,8 @@ namespace Orcbolg.Dsp
         public AsioDspSetting(string driverName, int sampleRate, int bufferLength)
         {
             if (driverName == null) throw new ArgumentNullException(nameof(driverName));
-            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
-            if (bufferLength <= 0) throw new ArgumentException("Buffer length must be greater than zero.");
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.", nameof(sampleRate));
+            if (bufferLength <= 0) throw new ArgumentException("Buffer length must be greater than zero.", nameof(bufferLength));
 
             this.driverName = driverName;
             this.sampleRate = sampleRate;

@@ -12,7 +12,7 @@ namespace Orcbolg.Dsp
         {
             if (driver == null) throw new ArgumentNullException(nameof(driver));
             if (gains == null) throw new ArgumentNullException(nameof(gains));
-            if (gains.Count != driver.OutputChannelCount) throw new ArgumentException("Number of gains must be equal to number of output channels.");
+            if (gains.Count != driver.OutputChannelCount) throw new ArgumentException("Number of gains must be equal to number of output channels.", nameof(gains));
 
             this.gains = gains.ToArray();
         }

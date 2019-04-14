@@ -52,7 +52,7 @@ namespace Orcbolg.Dsp
             }
             if (setting.InputChannels.Count == 0 && setting.OutputChannels.Count == 0)
             {
-                throw new ArgumentException("At least one input or output channel must be selected.");
+                throw new ArgumentException("At least one input or output channel must be specified.");
             }
 
             try

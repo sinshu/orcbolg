@@ -32,10 +32,10 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
-            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.");
-            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
-            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
+            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.", nameof(inputData));
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.", nameof(inputData));
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.", nameof(sampleRate));
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.", nameof(intervalLength));
 
             this.inputData = inputData;
             this.outputData = null;
@@ -60,13 +60,13 @@ namespace Orcbolg.Dsp
         public MemoryDspDriver(float[][] inputData, float[][] outputData, int sampleRate, int intervalLength)
         {
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
-            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.");
-            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.");
+            if (inputData.Any(x => x == null)) throw new ArgumentException("All input channels must not be null.", nameof(inputData));
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All input channels must have the same length.", nameof(inputData));
             if (outputData == null) throw new ArgumentNullException(nameof(outputData));
-            if (outputData.Any(x => x == null)) throw new ArgumentException("All output channels must not be null.");
-            if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All output channels must have the same length.");
-            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.");
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.");
+            if (outputData.Any(x => x == null)) throw new ArgumentException("All output channels must not be null.", nameof(outputData));
+            if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All output channels must have the same length.", nameof(outputData));
+            if (sampleRate <= 0) throw new ArgumentException("Sample rate must be greater than zero.", nameof(SampleRate));
+            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.", nameof(intervalLength));
 
             this.inputData = inputData;
             this.outputData = outputData;

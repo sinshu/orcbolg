@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Orcbolg.Dsp
 {
@@ -27,10 +26,10 @@ namespace Orcbolg.Dsp
 
         public OverlapAdd(int inputChannelCount, int outputChannelCount, int frameLength, int frameShift, FrameFunc func)
         {
-            if (inputChannelCount <= 0) throw new ArgumentException("Number of input channels must be greater than or equal to one.");
-            if (outputChannelCount <= 0) throw new ArgumentException("Number of output channels must be greater than or equal to one.");
-            if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.");
-            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.");
+            if (inputChannelCount <= 0) throw new ArgumentException("Number of input channels must be greater than or equal to one.", nameof(inputChannelCount));
+            if (outputChannelCount <= 0) throw new ArgumentException("Number of output channels must be greater than or equal to one.", nameof(outputChannelCount));
+            if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.", nameof(frameLength));
+            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.", nameof(frameShift));
             if (frameShift > frameLength) throw new ArgumentException("Frame shift must be less than or equal to frame length.");
             if (func == null) throw new ArgumentNullException(nameof(func));
 

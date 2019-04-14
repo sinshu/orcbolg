@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Orcbolg.Dsp
 {
@@ -21,9 +20,9 @@ namespace Orcbolg.Dsp
 
         public Framing(int channelCount, int frameLength, int frameShift, FrameAction action)
         {
-            if (channelCount <= 0) throw new ArgumentException("Number of channels must be greater than or equal to one.");
-            if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.");
-            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.");
+            if (channelCount <= 0) throw new ArgumentException("Number of channels must be greater than or equal to one.", nameof(channelCount));
+            if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.", nameof(frameLength));
+            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.", nameof(frameShift));
             if (frameShift > frameLength) throw new ArgumentException("Frame shift must be less than or equal to frame length.");
             if (action == null) throw new ArgumentNullException(nameof(action));
 
