@@ -1,0 +1,4 @@
+dataLength,intervalLength,channelCount,frameLength,frameShift
+1000,17,2,64,16
+1001,11,3,64,8
+1002,7,1,64,4

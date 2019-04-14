@@ -136,6 +136,7 @@ namespace Orcbolg.Dsp.Test
             private float[][][] coeffs;
             private OverlapAdd overlapAdd;
             private int frameCount;
+            private int expectedPosition;
 
             public TestDsp1(IDspDriver driver, int frameLength, int frameShift, float[][][] coeffs)
             {
@@ -145,6 +146,7 @@ namespace Orcbolg.Dsp.Test
                 this.coeffs = coeffs;
                 overlapAdd = new OverlapAdd(driver.InputChannelCount, driver.OutputChannelCount, frameLength, frameShift, FrameFunc);
                 frameCount = 0;
+                expectedPosition = frameShift - frameLength;
             }
 
             public int Process(float[][] inputInterval, float[][] outputInterval, int length)
@@ -162,6 +164,8 @@ namespace Orcbolg.Dsp.Test
                         outputFrame[ch][t] = coeffs[ch][frameCount][t] * inputFrame[ch][t];
                     }
                 }
+                Assert.IsTrue(expectedPosition == position);
+                expectedPosition += frameShift;
                 frameCount++;
             }
         }
@@ -174,6 +178,7 @@ namespace Orcbolg.Dsp.Test
             private float[][][] coeffs;
             private OverlapAdd overlapAdd;
             private int frameCount;
+            private int expectedPosition;
 
             public TestDsp2(IDspDriver driver, int frameLength, int frameShift, float[][][] coeffs)
             {
@@ -183,6 +188,7 @@ namespace Orcbolg.Dsp.Test
                 this.coeffs = coeffs;
                 overlapAdd = new OverlapAdd(driver.InputChannelCount, driver.OutputChannelCount, frameLength, frameShift, FrameFunc);
                 frameCount = 0;
+                expectedPosition = frameShift - frameLength;
             }
 
             public int Process(float[][] inputInterval, float[][] outputInterval, int length)
@@ -201,6 +207,8 @@ namespace Orcbolg.Dsp.Test
                         outputFrame[0][t] += coeffs[ch][frameCount][t] * inputFrame[ch][t];
                     }
                 }
+                Assert.IsTrue(expectedPosition == position);
+                expectedPosition += frameShift;
                 frameCount++;
             }
         }

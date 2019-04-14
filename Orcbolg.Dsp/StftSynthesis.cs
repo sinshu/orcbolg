@@ -15,6 +15,8 @@ namespace Orcbolg.Dsp
         private readonly int frameShift;
         private readonly StftFunc func;
 
+        private readonly double scale;
+
         private OverlapAdd overlapAdd;
         private Complex[][] inputBuffer;
         private Complex[][] outputBuffer;
@@ -35,6 +37,8 @@ namespace Orcbolg.Dsp
             this.frameShift = frameShift;
             this.func = func;
 
+            scale = 1 / (window.Select(x => x * x).Average() * ((double)window.Length / frameShift));
+
             overlapAdd = new OverlapAdd(inputChannelCount, outputChannelCount, window.Length, frameShift, FrameFunc);
             inputBuffer = new Complex[inputChannelCount][];
             for (var ch = 0; ch < inputChannelCount; ch++)
@@ -46,6 +50,11 @@ namespace Orcbolg.Dsp
             {
                 outputBuffer[ch] = new Complex[window.Length];
             }
+        }
+
+        public void Process(float[][] inputInterval, float[][] outputInterval, int length)
+        {
+            overlapAdd.Process(inputInterval, outputInterval, length);
         }
 
         // Since FFT in Math.NET seems to do memory allocation,
@@ -67,7 +76,7 @@ namespace Orcbolg.Dsp
                 Fourier.Inverse(outputBuffer[ch], FourierOptions.AsymmetricScaling);
                 for (var t = 0; t < window.Length; t++)
                 {
-                    outputFrame[ch][t] = (float)(window[t] * outputBuffer[ch][t]).Real;
+                    outputFrame[ch][t] = (float)(scale * window[t] * outputBuffer[ch][t]).Real;
                 }
             }
         }

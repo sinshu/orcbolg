@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using MathNet.Numerics.IntegralTransforms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Orcbolg.Dsp.Test
 {
     [TestClass]
-    public class FramingTest
+    public class StftAnalysisTest
     {
         [TestMethod]
         public void Test()
         {
             var seed = 2357;
-            var testCases = Utilities.ReadTestCases(@"cases\FramingTest.Test.csv");
+            var testCases = Utilities.ReadTestCases(@"cases\StftAnalysisTest.Test.csv");
             foreach (var testCase in testCases)
             {
                 var dataLength = testCase["dataLength"];
@@ -50,7 +52,8 @@ namespace Orcbolg.Dsp.Test
             private int frameLength;
             private int frameShift;
             private float[][][] reference;
-            private Framing framing;
+            private double[] window;
+            private StftAnalysis stftAnalysis;
             private int frameCount;
             private int expectedPosition;
 
@@ -60,20 +63,24 @@ namespace Orcbolg.Dsp.Test
                 this.reference = reference;
                 this.frameLength = frameLength;
                 this.frameShift = frameShift;
-                framing = new Framing(driver.InputChannelCount, frameLength, frameShift, FrameAction);
+                window = WindowFunc.CreateHann(frameLength);
+                stftAnalysis = new StftAnalysis(driver.InputChannelCount, window, frameShift, StftAction);
                 frameCount = 0;
                 expectedPosition = frameShift - frameLength;
             }
 
             public int Process(float[][] inputInterval, float[][] outputInterval, int length)
             {
-                framing.Process(inputInterval, length);
+                stftAnalysis.Process(inputInterval, length);
                 return 0;
             }
 
-            public void FrameAction(long position, float[][] frame)
+            public void StftAction(long position, Complex[][] stft)
             {
-                Utilities.AreEqual(reference[frameCount], frame);
+                var expected = reference[frameCount].Select(x => x.Zip(window, (c1, c2) => (float)(c1 * c2)).ToArray()).ToArray();
+                stft.ForEach(x => Fourier.Inverse(x, FourierOptions.AsymmetricScaling));
+                var actual = stft.Select(x => x.Select(c => (float)c.Real).ToArray()).ToArray();
+                Utilities.AreEqual(expected, actual);
                 Assert.IsTrue(expectedPosition == position);
                 expectedPosition += frameShift;
                 frameCount++;
