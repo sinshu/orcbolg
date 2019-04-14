@@ -16,5 +16,16 @@ namespace Orcbolg.Dsp
             }
             return window;
         }
+
+        public static double[] CreateSqrtHann(int length)
+        {
+            var window = new double[length];
+            for (var t = 0; t < length; t++)
+            {
+                var x = 2 * Math.PI * t / length;
+                window[t] = Math.Sqrt((1 - Math.Cos(x)) / 2);
+            }
+            return window;
+        }
     }
 }
