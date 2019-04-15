@@ -14,7 +14,7 @@ namespace Orcbolg.Recog
             if (destination == null) throw new ArgumentNullException(nameof(destination));
 
             var half = source.Length / 2;
-            if (source.Length != half) throw new ArgumentException("Length of destination must be half the length of source.");
+            if (destination.Length != half) throw new ArgumentException("Length of destination must be half the length of source.");
 
             destination[0] = source[0].Magnitude / source.Length;
             for (var w = 1; w < destination.Length; w++)

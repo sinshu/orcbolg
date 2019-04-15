@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workspace", "Workspace\Work
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orcbolg.Dsp.Test", "Orcbolg.Dsp.Test\Orcbolg.Dsp.Test.csproj", "{C696FC4E-C519-4D11-A247-D4CF3F058C7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orcbolg.Recog.Test", "Orcbolg.Recog.Test\Orcbolg.Recog.Test.csproj", "{249DAB75-C64C-42CB-B3A3-65B76D7808E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C696FC4E-C519-4D11-A247-D4CF3F058C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C696FC4E-C519-4D11-A247-D4CF3F058C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C696FC4E-C519-4D11-A247-D4CF3F058C7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{249DAB75-C64C-42CB-B3A3-65B76D7808E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{249DAB75-C64C-42CB-B3A3-65B76D7808E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{249DAB75-C64C-42CB-B3A3-65B76D7808E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{249DAB75-C64C-42CB-B3A3-65B76D7808E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
