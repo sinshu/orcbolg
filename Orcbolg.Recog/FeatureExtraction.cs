@@ -89,5 +89,14 @@ namespace Orcbolg.Recog
                 return source[(int)Math.Floor(centerIndex)];
             }
         }
+
+        public static double GetAmplitudeWithTriangularFilter(double[] source, int sampleRate, int frameLength, double lowerFrequency, double centerFrequency, double upperFrequency)
+        {
+            var scale = (double)frameLength / sampleRate;
+            var lowerIndex = scale * lowerFrequency;
+            var centerIndex = scale * centerFrequency;
+            var upperIndex = scale * upperFrequency;
+            return GetAmplitudeWithTriangularFilter(source, lowerFrequency, centerFrequency, upperFrequency);
+        }
     }
 }
