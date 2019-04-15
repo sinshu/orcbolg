@@ -96,7 +96,7 @@ namespace Orcbolg.Recog
             var lowerIndex = scale * lowerFrequency;
             var centerIndex = scale * centerFrequency;
             var upperIndex = scale * upperFrequency;
-            return GetAmplitudeWithTriangularFilter(source, lowerFrequency, centerFrequency, upperFrequency);
+            return GetAmplitudeWithTriangularFilter(source, lowerIndex, centerIndex, upperIndex);
         }
     }
 }
