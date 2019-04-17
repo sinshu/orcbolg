@@ -57,7 +57,7 @@ namespace Orcbolg.Dsp
             overlapAdd.Process(inputInterval, outputInterval, length);
         }
 
-        // Since FFT in Math.NET seems to do memory allocation,
+        // Since the FFT implementation in Math.NET seems to do memory allocation,
         // this implementation might trouble if it is used in the audio thread
         // and the realtime audio buffer is very short.
         private void FrameFunc(long position, float[][] inputFrame, float[][] outputFrame)
