@@ -36,7 +36,7 @@ namespace Orcbolg.Dsp
         public FileDspDriver(string inputFileName, int intervalLength)
         {
             if (inputFileName == null) throw new ArgumentNullException(nameof(inputFileName));
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.", nameof(intervalLength));
+            if (intervalLength <= 0) throw new ArgumentOutOfRangeException("The interval length must be greater than zero.", nameof(intervalLength));
 
             try
             {
@@ -74,8 +74,8 @@ namespace Orcbolg.Dsp
         {
             if (inputFileName == null) throw new ArgumentNullException(nameof(inputFileName));
             if (outputFileName == null) throw new ArgumentNullException(nameof(outputFileName));
-            if (outputChannelCount <= 0) throw new ArgumentException("At least one output channel must be specified.", nameof(outputChannelCount));
-            if (intervalLength <= 0) throw new ArgumentException("Interval length must be greater than zero.", nameof(intervalLength));
+            if (outputChannelCount <= 0) throw new ArgumentOutOfRangeException("At least one output channel must be specified.", nameof(outputChannelCount));
+            if (intervalLength <= 0) throw new ArgumentOutOfRangeException("The interval length must be greater than zero.", nameof(intervalLength));
 
             try
             {
@@ -149,7 +149,7 @@ namespace Orcbolg.Dsp
 
             if (sampleOffset + sampleCount > dataLength)
             {
-                throw new ArgumentException("Sample offset or count is too big.");
+                throw new ArgumentOutOfRangeException("The sample offset or count is too big.");
             }
 
             this.sampleOffset = sampleOffset;

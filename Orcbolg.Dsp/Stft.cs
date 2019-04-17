@@ -13,8 +13,8 @@ namespace Orcbolg.Dsp
         public static void Mirror(Complex[] stft)
         {
             if (stft == null) throw new ArgumentNullException(nameof(stft));
-            if (stft.Length == 0) throw new ArgumentException("Length of STFT must be greater than zero.", nameof(stft));
-            if (stft.Length % 2 != 0) throw new ArgumentException("Length of STFT must be even.", nameof(stft));
+            if (stft.Length == 0) throw new ArgumentException("The length of STFT must be greater than zero.", nameof(stft));
+            if (stft.Length % 2 != 0) throw new ArgumentException("The length of STFT must be even.", nameof(stft));
 
             var half = stft.Length / 2;
             for (var w = 1; w < half; w++)

@@ -38,7 +38,7 @@ namespace Orcbolg.Dsp
         {
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("Start method must not be called more than once.");
+                throw new InvalidOperationException("Start must not be called more than once.");
             }
 
             state = DspState.Running;
@@ -74,7 +74,7 @@ namespace Orcbolg.Dsp
                         }
                         else
                         {
-                            var e = new DspException("Connection to the audio device timed out.");
+                            var e = new DspException("The connection to the audio device timed out.");
                             e.Data["thrower"] = GetType().Name;
                             throw e;
                         }

@@ -20,10 +20,10 @@ namespace Orcbolg.Dsp
 
         public Framing(int channelCount, int frameLength, int frameShift, FrameAction action)
         {
-            if (channelCount <= 0) throw new ArgumentException("Number of channels must be greater than or equal to one.", nameof(channelCount));
-            if (frameLength <= 0) throw new ArgumentException("Frame length must be greater than zero.", nameof(frameLength));
-            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.", nameof(frameShift));
-            if (frameShift > frameLength) throw new ArgumentException("Frame shift must be less than or equal to frame length.");
+            if (channelCount <= 0) throw new ArgumentOutOfRangeException("The number of channels must be greater than or equal to one.", nameof(channelCount));
+            if (frameLength <= 0) throw new ArgumentOutOfRangeException("The frame length must be greater than zero.", nameof(frameLength));
+            if (frameShift <= 0) throw new ArgumentOutOfRangeException("The frame shift must be greater than zero.", nameof(frameShift));
+            if (frameShift > frameLength) throw new ArgumentOutOfRangeException("The frame shift must be less than or equal to the frame length.");
             if (action == null) throw new ArgumentNullException(nameof(action));
 
             this.channelCount = channelCount;

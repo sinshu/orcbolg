@@ -59,11 +59,11 @@ namespace Orcbolg.Dsp
 
             if ((double)updateInterval / driver.SampleRate < 0.001)
             {
-                throw new ArgumentException("Update interval must be greater than or equal to 1 ms.");
+                throw new ArgumentOutOfRangeException("The update interval must be greater than or equal to 1 ms.");
             }
             if (drawCycle <= 0)
             {
-                throw new ArgumentException("Draw cycle must be greater than or equal to one.");
+                throw new ArgumentOutOfRangeException("The draw cycle must be greater than or equal to one.");
             }
 
             try

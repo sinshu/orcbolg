@@ -52,7 +52,7 @@ namespace Orcbolg.Dsp
             }
             if (setting.InputChannels.Count == 0 && setting.OutputChannels.Count == 0)
             {
-                throw new ArgumentException("At least one input or output channel must be specified.");
+                throw new ArgumentOutOfRangeException("At least one input or output channel must be specified.");
             }
 
             try
@@ -333,7 +333,7 @@ namespace Orcbolg.Dsp
                     if (entry == null)
                     {
                         stopped = true;
-                        var e = new DspException("Buffer length is not sufficient.");
+                        var e = new DspException("The length of the buffer for non-real-time DSPs is not sufficient.");
                         e.Data["thrower"] = GetType().Name;
                         throw e;
                     }
@@ -403,7 +403,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Read_Int32LSB24;
                     default:
-                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
                 }
             }
 
@@ -416,7 +416,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Write_Int32LSB24;
                     default:
-                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
                 }
             }
 
@@ -429,7 +429,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Clear_Int32LSB24;
                     default:
-                        throw new DspException("ASIO sample type " + asioSampleType + " is not supported.");
+                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
                 }
             }
 

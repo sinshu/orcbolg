@@ -24,11 +24,11 @@ namespace Orcbolg.Dsp
         public StftSynthesis(int inputChannelCount, int outputChannelCount, double[] window, int frameShift, StftFunc func)
         {
             if (inputChannelCount == 0 && outputChannelCount == 0) throw new ArgumentException("At least one input or output channel must be specified.");
-            if (inputChannelCount < 0) throw new ArgumentException("Number of input channels must be greater than or equal to zero.", nameof(inputChannelCount));
-            if (outputChannelCount < 0) throw new ArgumentException("Number of output channels must be greater than or equal to zero.", nameof(outputChannelCount));
+            if (inputChannelCount < 0) throw new ArgumentOutOfRangeException("The number of input channels must be greater than or equal to zero.", nameof(inputChannelCount));
+            if (outputChannelCount < 0) throw new ArgumentOutOfRangeException("The number of output channels must be greater than or equal to zero.", nameof(outputChannelCount));
             if (window == null) throw new ArgumentNullException(nameof(window));
-            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.", nameof(frameShift));
-            if (frameShift > window.Length) throw new ArgumentException("Frame shift must be less than or equal to window length.");
+            if (frameShift <= 0) throw new ArgumentOutOfRangeException("The frame shift must be greater than zero.", nameof(frameShift));
+            if (frameShift > window.Length) throw new ArgumentOutOfRangeException("The frame shift must be less than or equal to the length of the window.");
             if (func == null) throw new ArgumentNullException(nameof(func));
 
             this.inputChannelCount = inputChannelCount;

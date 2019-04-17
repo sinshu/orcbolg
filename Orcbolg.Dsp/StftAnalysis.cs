@@ -19,10 +19,10 @@ namespace Orcbolg.Dsp
 
         public StftAnalysis(int channelCount, double[] window, int frameShift, StftAction action)
         {
-            if (channelCount < 0) throw new ArgumentException("Number of channels must be greater than or equal to zero.", nameof(channelCount));
+            if (channelCount < 0) throw new ArgumentOutOfRangeException("The number of channels must be greater than or equal to zero.", nameof(channelCount));
             if (window == null) throw new ArgumentNullException(nameof(window));
-            if (frameShift <= 0) throw new ArgumentException("Frame shift must be greater than zero.", nameof(frameShift));
-            if (frameShift > window.Length) throw new ArgumentException("Frame shift must be less than or equal to window length.");
+            if (frameShift <= 0) throw new ArgumentOutOfRangeException("The frame shift must be greater than zero.", nameof(frameShift));
+            if (frameShift > window.Length) throw new ArgumentOutOfRangeException("The frame shift must be less than or equal to the length of the window.");
             if (action == null) throw new ArgumentNullException(nameof(action));
 
             this.channelCount = channelCount;
