@@ -58,7 +58,7 @@ namespace Orcbolg.Dsp
         }
 
         // Since the FFT implementation in Math.NET seems to do memory allocation,
-        // this implementation might trouble if it is used in the audio thread
+        // this code might trouble if it is used in the audio thread
         // and the realtime audio buffer is very short.
         private void FrameFunc(long position, float[][] inputFrame, float[][] outputFrame)
         {
