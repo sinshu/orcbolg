@@ -129,6 +129,7 @@ namespace Orcbolg.Dsp
         public static void Write(float[][] data, int sampleRate, string fileName)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.Length == 0) throw new ArgumentException("The number of the channels must be greater than zero.", nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
             if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
@@ -139,6 +140,7 @@ namespace Orcbolg.Dsp
         public static void Write(float[][] data, int sampleRate, string fileName, int sampleOffset, int sampleCount)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.Length == 0) throw new ArgumentException("The number of the channels must be greater than zero.", nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
             if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
@@ -152,6 +154,7 @@ namespace Orcbolg.Dsp
         public static void Write(float[][] data, int sampleRate, string fileName, TimeSpan offset, TimeSpan length)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.Length == 0) throw new ArgumentException("The number of the channels must be greater than zero.", nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
             if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
