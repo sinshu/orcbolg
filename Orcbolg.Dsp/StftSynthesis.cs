@@ -13,15 +13,15 @@ namespace Orcbolg.Dsp
         private readonly int outputChannelCount;
         private readonly double[] window;
         private readonly int frameShift;
-        private readonly StftFunc func;
+        private readonly DftFunc func;
 
         private readonly double scale;
 
         private OverlapAdd overlapAdd;
-        private Complex[][] inputBuffer;
-        private Complex[][] outputBuffer;
+        private Complex[][] inputDftBuffer;
+        private Complex[][] outputDftBuffer;
 
-        public StftSynthesis(int inputChannelCount, int outputChannelCount, double[] window, int frameShift, StftFunc func)
+        public StftSynthesis(int inputChannelCount, int outputChannelCount, double[] window, int frameShift, DftFunc func)
         {
             if (inputChannelCount == 0 && outputChannelCount == 0) throw new ArgumentException("At least one input or output channel must be specified.");
             if (inputChannelCount < 0) throw new ArgumentOutOfRangeException("The number of input channels must be greater than or equal to zero.", nameof(inputChannelCount));
@@ -40,15 +40,15 @@ namespace Orcbolg.Dsp
             scale = 1 / (window.Select(x => x * x).Average() * ((double)window.Length / frameShift));
 
             overlapAdd = new OverlapAdd(inputChannelCount, outputChannelCount, window.Length, frameShift, FrameFunc);
-            inputBuffer = new Complex[inputChannelCount][];
+            inputDftBuffer = new Complex[inputChannelCount][];
             for (var ch = 0; ch < inputChannelCount; ch++)
             {
-                inputBuffer[ch] = new Complex[window.Length];
+                inputDftBuffer[ch] = new Complex[window.Length];
             }
-            outputBuffer = new Complex[outputChannelCount][];
+            outputDftBuffer = new Complex[outputChannelCount][];
             for (var ch = 0; ch < outputChannelCount; ch++)
             {
-                outputBuffer[ch] = new Complex[window.Length];
+                outputDftBuffer[ch] = new Complex[window.Length];
             }
         }
 
@@ -66,17 +66,17 @@ namespace Orcbolg.Dsp
             {
                 for (var t = 0; t < window.Length; t++)
                 {
-                    inputBuffer[ch][t] = window[t] * inputFrame[ch][t];
+                    inputDftBuffer[ch][t] = window[t] * inputFrame[ch][t];
                 }
-                Fourier.Forward(inputBuffer[ch], FourierOptions.AsymmetricScaling);
+                Fourier.Forward(inputDftBuffer[ch], FourierOptions.AsymmetricScaling);
             }
-            func(position, inputBuffer, outputBuffer);
+            func(position, inputDftBuffer, outputDftBuffer);
             for (var ch = 0; ch < outputChannelCount; ch++)
             {
-                Fourier.Inverse(outputBuffer[ch], FourierOptions.AsymmetricScaling);
+                Fourier.Inverse(outputDftBuffer[ch], FourierOptions.AsymmetricScaling);
                 for (var t = 0; t < window.Length; t++)
                 {
-                    outputFrame[ch][t] = (float)(scale * window[t] * outputBuffer[ch][t]).Real;
+                    outputFrame[ch][t] = (float)(scale * window[t] * outputDftBuffer[ch][t]).Real;
                 }
             }
         }
@@ -92,5 +92,5 @@ namespace Orcbolg.Dsp
 
 
 
-    public delegate void StftFunc(long position, Complex[][] inputStft, Complex[][] outputStft);
+    public delegate void DftFunc(long position, Complex[][] inputDft, Complex[][] outputDft);
 }

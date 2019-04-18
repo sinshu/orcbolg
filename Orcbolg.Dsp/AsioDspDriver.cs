@@ -52,7 +52,7 @@ namespace Orcbolg.Dsp
             }
             if (setting.InputChannels.Count == 0 && setting.OutputChannels.Count == 0)
             {
-                throw new ArgumentOutOfRangeException("At least one input or output channel must be specified.");
+                throw new ArgumentOutOfRangeException("At least one input or output channel must be specified.", nameof(setting));
             }
 
             try
@@ -136,7 +136,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp must be called before Run is called.");
+                throw new InvalidOperationException("The AddDsp method must be called before the Run method is called.");
             }
 
             realtimeDsps.Add(dsp);
@@ -148,7 +148,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp must be called before Run is called.");
+                throw new InvalidOperationException("The AddDsp method must be called before the Run method is called.");
             }
 
             nonrealtimeDsps.Add(dsp);
@@ -164,7 +164,7 @@ namespace Orcbolg.Dsp
             }
             else
             {
-                throw new InvalidOperationException("Run must be called when the driver is not running.");
+                throw new InvalidOperationException("The Run method must be called when the driver is not running.");
             }
         }
 
@@ -403,7 +403,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Read_Int32LSB24;
                     default:
-                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
+                        throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
             }
 
@@ -416,7 +416,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Write_Int32LSB24;
                     default:
-                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
+                        throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
             }
 
@@ -429,7 +429,7 @@ namespace Orcbolg.Dsp
                     case AsioSampleType.Int32LSB24:
                         return Clear_Int32LSB24;
                     default:
-                        throw new DspException("The sample type '" + asioSampleType + "' is not supported.");
+                        throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
             }
 

@@ -12,12 +12,12 @@ namespace Orcbolg.Dsp
         private readonly int channelCount;
         private readonly double[] window;
         private readonly int frameShift;
-        private readonly StftAction action;
+        private readonly DftAction action;
 
         private Framing framing;
-        private Complex[][] buffer;
+        private Complex[][] dftBuffer;
 
-        public StftAnalysis(int channelCount, double[] window, int frameShift, StftAction action)
+        public StftAnalysis(int channelCount, double[] window, int frameShift, DftAction action)
         {
             if (channelCount < 0) throw new ArgumentOutOfRangeException("The number of channels must be greater than or equal to zero.", nameof(channelCount));
             if (window == null) throw new ArgumentNullException(nameof(window));
@@ -31,10 +31,10 @@ namespace Orcbolg.Dsp
             this.action = action;
 
             framing = new Framing(channelCount, window.Length, frameShift, FrameAction);
-            buffer = new Complex[channelCount][];
+            dftBuffer = new Complex[channelCount][];
             for (var ch = 0; ch < channelCount; ch++)
             {
-                buffer[ch] = new Complex[window.Length];
+                dftBuffer[ch] = new Complex[window.Length];
             }
         }
 
@@ -49,11 +49,11 @@ namespace Orcbolg.Dsp
             {
                 for (var t = 0; t < window.Length; t++)
                 {
-                    buffer[ch][t] = window[t] * frame[ch][t];
+                    dftBuffer[ch][t] = window[t] * frame[ch][t];
                 }
-                Fourier.Forward(buffer[ch], FourierOptions.AsymmetricScaling);
+                Fourier.Forward(dftBuffer[ch], FourierOptions.AsymmetricScaling);
             }
-            action(position, buffer);
+            action(position, dftBuffer);
         }
 
         public long ProcessedSampleCount
@@ -67,5 +67,5 @@ namespace Orcbolg.Dsp
 
 
 
-    public delegate void StftAction(long position, Complex[][] stft);
+    public delegate void DftAction(long position, Complex[][] dft);
 }

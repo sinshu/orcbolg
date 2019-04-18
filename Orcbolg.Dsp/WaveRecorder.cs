@@ -23,7 +23,7 @@ namespace Orcbolg.Dsp
         private string dstCsvPath;
         private string recCsvPath;
         private StreamWriter csvWriter;
-        private long recordingSampleCount;
+        private long desiredRecordingSampleCount;
         private int bufferedSampleCount;
         private long recordedSampleCount;
         private long recordingStartPosition;
@@ -45,7 +45,7 @@ namespace Orcbolg.Dsp
             dstCsvPath = null;
             recCsvPath = null;
             csvWriter = null;
-            recordingSampleCount = 0;
+            desiredRecordingSampleCount = 0;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
             recordingStartPosition = -1;
@@ -108,7 +108,7 @@ namespace Orcbolg.Dsp
             recCsvPath = AddSuffix(dstCsvPath, recordingSuffix);
             csvWriter = new StreamWriter(recCsvPath, false, Encoding.Default);
             csvWriter.WriteLine("Position,Message");
-            recordingSampleCount = command.SampleCount;
+            desiredRecordingSampleCount = command.SampleCount;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
             recordingStartPosition = -1;
@@ -156,7 +156,7 @@ namespace Orcbolg.Dsp
                                 bufferedSampleCount = 0;
                             }
                             recordedSampleCount++;
-                            if (recordedSampleCount == recordingSampleCount)
+                            if (recordedSampleCount == desiredRecordingSampleCount)
                             {
                                 context.Post(new RecordingCompleteCommand());
                                 if (bufferedSampleCount > 0)
@@ -176,9 +176,10 @@ namespace Orcbolg.Dsp
 
         private void Process(IDspContext context, KeyDownCommand command)
         {
-            if (csvWriter != null)
+            if (csvWriter != null && recordingStartPosition != -1)
             {
-                csvWriter.WriteLine(processedSampleCount + ",Key_" + command.Value);
+                var position = processedSampleCount - recordingStartPosition;
+                csvWriter.WriteLine(position + ",Key_" + command.Value);
             }
         }
 
@@ -212,7 +213,7 @@ namespace Orcbolg.Dsp
                 dstCsvPath = null;
                 recCsvPath = null;
             }
-            recordingSampleCount = 0;
+            desiredRecordingSampleCount = 0;
             bufferedSampleCount = 0;
             recordedSampleCount = 0;
             recordingStartPosition = -1;

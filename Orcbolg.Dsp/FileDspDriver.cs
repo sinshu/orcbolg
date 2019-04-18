@@ -115,7 +115,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp must be called before Run is called.");
+                throw new InvalidOperationException("The AddDsp method must be called before the Run method is called.");
             }
 
             realtimeDsps.Add(dsp);
@@ -127,7 +127,7 @@ namespace Orcbolg.Dsp
 
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("AddDsp must be called before Run is called.");
+                throw new InvalidOperationException("The AddDsp method must be called before the Run method is called.");
             }
 
             nonrealtimeDsps.Add(dsp);
@@ -139,7 +139,7 @@ namespace Orcbolg.Dsp
 
             if (state == DspState.Running)
             {
-                throw new InvalidOperationException("SetStartPosition must be called when the driver is not running.");
+                throw new InvalidOperationException("The SetSpan method must be called when the driver is not running.");
             }
 
             if (!(0 <= sampleOffset && sampleOffset <= dataLength))
@@ -167,7 +167,7 @@ namespace Orcbolg.Dsp
             }
             else
             {
-                throw new InvalidOperationException("Run must be called when the driver is not running.");
+                throw new InvalidOperationException("The Run method must be called when the driver is not running.");
             }
         }
 

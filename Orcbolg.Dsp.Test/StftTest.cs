@@ -19,7 +19,7 @@ namespace Orcbolg.Dsp.Test
             test[2] = new Complex(5, 6);
             test[3] = new Complex(7, 8);
             test[4] = new Complex(9, 10);
-            Stft.Mirror(test);
+            Dft.Mirror(test);
             Assert.IsTrue((test[0] - new Complex(1, 2)).Magnitude < 0.001);
             Assert.IsTrue((test[1] - new Complex(3, 4)).Magnitude < 0.001);
             Assert.IsTrue((test[2] - new Complex(5, 6)).Magnitude < 0.001);

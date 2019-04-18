@@ -38,7 +38,7 @@ namespace Orcbolg.Dsp
         {
             if (state != DspState.Initialized)
             {
-                throw new InvalidOperationException("Start must not be called more than once.");
+                throw new InvalidOperationException("The Start method must not be called more than once.");
             }
 
             state = DspState.Running;
