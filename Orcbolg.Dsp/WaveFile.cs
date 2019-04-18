@@ -130,7 +130,7 @@ namespace Orcbolg.Dsp
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
-            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same length.", nameof(data));
+            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             WriteSub(data, sampleRate, fileName, 0, data[0].Length);
@@ -140,7 +140,7 @@ namespace Orcbolg.Dsp
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
-            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same length.", nameof(data));
+            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             if (sampleOffset < 0) throw new ArgumentOutOfRangeException("The sample offset must be greater than or equal to zero.", nameof(sampleOffset));
@@ -153,7 +153,7 @@ namespace Orcbolg.Dsp
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (data.Any(x => x == null)) throw new ArgumentException("All the channels must not be null.", nameof(data));
-            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same length.", nameof(data));
+            if (data.Any(x => x.Length != data[0].Length)) throw new ArgumentException("All the channels must have the same data length.", nameof(data));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             var sampleOffset = (int)Math.Round(sampleRate * offset.TotalSeconds);

@@ -15,6 +15,8 @@ namespace Orcbolg.Dsp
 
         internal StopCommand(Exception exception)
         {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+
             this.exception = exception;
         }
 

@@ -34,7 +34,7 @@ namespace Orcbolg.Dsp
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
             if (inputData.Length == 0) throw new ArgumentException("The number of input channels must be greater than or equal to one.", nameof(inputData));
             if (inputData.Any(x => x == null)) throw new ArgumentException("All the input channels must not be null.", nameof(inputData));
-            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All the input channels must have the same length.", nameof(inputData));
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All the input channels must have the same data length.", nameof(inputData));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(sampleRate));
             if (intervalLength <= 0) throw new ArgumentOutOfRangeException("The interval length must be greater than zero.", nameof(intervalLength));
 
@@ -63,11 +63,11 @@ namespace Orcbolg.Dsp
             if (inputData == null) throw new ArgumentNullException(nameof(inputData));
             if (inputData.Length == 0) throw new ArgumentException("The number of input channels must be greater than or equal to one.", nameof(inputData));
             if (inputData.Any(x => x == null)) throw new ArgumentException("All the input channels must not be null.", nameof(inputData));
-            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All the input channels must have the same length.", nameof(inputData));
+            if (inputData.Any(x => x.Length != inputData[0].Length)) throw new ArgumentException("All the input channels must have the same data length.", nameof(inputData));
             if (outputData == null) throw new ArgumentNullException(nameof(outputData));
             if (outputData.Length == 0) throw new ArgumentException("The number of output channels must be greater than or equal to one.", nameof(outputData));
             if (outputData.Any(x => x == null)) throw new ArgumentException("All the output channels must not be null.", nameof(outputData));
-            if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All the output channels must have the same length.", nameof(outputData));
+            if (outputData.Any(x => x.Length != outputData[0].Length)) throw new ArgumentException("All the output channels must have the same buffer length.", nameof(outputData));
             if (sampleRate <= 0) throw new ArgumentOutOfRangeException("The sample rate must be greater than zero.", nameof(SampleRate));
             if (intervalLength <= 0) throw new ArgumentOutOfRangeException("The interval length must be greater than zero.", nameof(intervalLength));
 
