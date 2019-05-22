@@ -66,13 +66,13 @@ namespace Orcbolg.Dsp
                 throw new ArgumentOutOfRangeException("The draw cycle must be greater than or equal to one.");
             }
 
+            this.pictureBox = pictureBox;
+            this.updateInterval = updateInterval;
+            this.drawCycle = drawCycle;
+            this.showOutput = showOutput;
+
             try
             {
-                this.pictureBox = pictureBox;
-                this.updateInterval = updateInterval;
-                this.drawCycle = drawCycle;
-                this.showOutput = showOutput;
-
                 channelCount = showOutput ? driver.InputChannelCount + driver.OutputChannelCount : driver.InputChannelCount;
                 sampleRate = driver.SampleRate;
                 channelNames = new string[channelCount];

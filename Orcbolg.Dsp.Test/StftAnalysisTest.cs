@@ -46,7 +46,7 @@ namespace Orcbolg.Dsp.Test
             }
         }
 
-        private class TestDsp : IRealtimeDsp
+        private class TestDsp : INonrealtimeDsp
         {
             private IDspDriver driver;
             private int frameLength;
@@ -69,13 +69,16 @@ namespace Orcbolg.Dsp.Test
                 expectedPosition = frameShift - frameLength;
             }
 
-            public int Process(float[][] inputInterval, float[][] outputInterval, int length)
+            public void Process(IDspContext context, IDspCommand command)
             {
-                stftAnalysis.Process(inputInterval, length);
-                return 0;
+                var intervalCommand = command as IntervalCommand;
+                if (intervalCommand != null)
+                {
+                    stftAnalysis.Process(context, intervalCommand.InputInterval, intervalCommand.Length);
+                }
             }
 
-            public void StftAction(long position, Complex[][] stft)
+            public void StftAction(IDspContext context, long position, Complex[][] stft)
             {
                 var expected = reference[frameCount].Select(x => x.Zip(window, (c1, c2) => (float)(c1 * c2)).ToArray()).ToArray();
                 stft.ForEach(x => Fourier.Inverse(x, FourierOptions.AsymmetricScaling));

@@ -44,7 +44,7 @@ namespace Orcbolg.Dsp.Test
             }
         }
 
-        private class TestDsp : IRealtimeDsp
+        private class TestDsp : INonrealtimeDsp
         {
             private IDspDriver driver;
             private int frameLength;
@@ -65,13 +65,16 @@ namespace Orcbolg.Dsp.Test
                 expectedPosition = frameShift - frameLength;
             }
 
-            public int Process(float[][] inputInterval, float[][] outputInterval, int length)
+            public void Process(IDspContext context, IDspCommand command)
             {
-                framing.Process(inputInterval, length);
-                return 0;
+                var intervalCommand = command as IntervalCommand;
+                if (intervalCommand != null)
+                {
+                    framing.Process(context, intervalCommand.InputInterval, intervalCommand.Length);
+                }
             }
 
-            public void FrameAction(long position, float[][] frame)
+            public void FrameAction(IDspContext context, long position, float[][] frame)
             {
                 Utilities.AreEqual(reference[frameCount], frame);
                 Assert.IsTrue(expectedPosition == position);

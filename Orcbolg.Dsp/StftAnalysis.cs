@@ -38,12 +38,12 @@ namespace Orcbolg.Dsp
             }
         }
 
-        public void Process(float[][] frame, int length)
+        public void Process(IDspContext context, float[][] frame, int length)
         {
-            framing.Process(frame, length);
+            framing.Process(context, frame, length);
         }
 
-        private void FrameAction(long position, float[][] frame)
+        private void FrameAction(IDspContext context, long position, float[][] frame)
         {
             for (var ch = 0; ch < channelCount; ch++)
             {
@@ -53,7 +53,7 @@ namespace Orcbolg.Dsp
                 }
                 Fourier.Forward(dftBuffer[ch], FourierOptions.AsymmetricScaling);
             }
-            action(position, dftBuffer);
+            action(context, position, dftBuffer);
         }
 
         public long ProcessedSampleCount
@@ -67,5 +67,5 @@ namespace Orcbolg.Dsp
 
 
 
-    public delegate void DftAction(long position, Complex[][] dft);
+    public delegate void DftAction(IDspContext context, long position, Complex[][] dft);
 }

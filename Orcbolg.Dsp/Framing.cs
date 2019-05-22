@@ -43,7 +43,7 @@ namespace Orcbolg.Dsp
             shiftCount = 0;
         }
 
-        public void Process(float[][] interval, int length)
+        public void Process(IDspContext context, float[][] interval, int length)
         {
             for (var t = 0; t < length; t++)
             {
@@ -60,20 +60,20 @@ namespace Orcbolg.Dsp
                 shiftCount++;
                 if (shiftCount == frameShift)
                 {
-                    DoAction();
+                    DoAction(context);
                     shiftCount = 0;
                 }
             }
         }
 
-        private void DoAction()
+        private void DoAction(IDspContext context)
         {
             for (var ch = 0; ch < channelCount; ch++)
             {
                 Array.Copy(buffer[ch], writeCount, frame[ch], 0, frameLength - writeCount);
                 Array.Copy(buffer[ch], 0, frame[ch], frameLength - writeCount, writeCount);
             }
-            action(processedSampleCount - frameLength, frame);
+            action(context, processedSampleCount - frameLength, frame);
         }
 
         public long ProcessedSampleCount
@@ -87,5 +87,5 @@ namespace Orcbolg.Dsp
 
 
 
-    public delegate void FrameAction(long position, float[][] frame);
+    public delegate void FrameAction(IDspContext context, long position, float[][] frame);
 }
