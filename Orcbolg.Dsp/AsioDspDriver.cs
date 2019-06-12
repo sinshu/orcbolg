@@ -332,6 +332,10 @@ namespace Orcbolg.Dsp
                     var entry = driver.buffer.StartWriting();
                     if (entry == null)
                     {
+                        for (var ch = 0; ch < driver.asioOutputChannelIndices.Length; ch++)
+                        {
+                            driver.clearDelegate(outputChannels[driver.asioOutputChannelIndices[ch]], driver.intervalLength);
+                        }
                         stopped = true;
                         var e = new DspException("The length of the buffer for non-real-time DSPs is not sufficient.");
                         e.Data["thrower"] = GetType().Name;
