@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Orcbolg.Dsp.Test
 {
     [TestClass]
-    public class StftTest
+    public class DftTest
     {
         [TestMethod]
         public void Mirror()
