@@ -72,7 +72,6 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DftAnalysisTest.cs" />
     <Compile Include="GaussianTest.cs" />
     <Compile Include="PcaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

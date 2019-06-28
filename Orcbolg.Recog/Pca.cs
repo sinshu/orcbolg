@@ -18,7 +18,7 @@ namespace Orcbolg.Recog
             mean = Stats.Mean(xs);
             covariance = Stats.Covariance(xs, mean);
             var svd = covariance.Svd();
-            projection = -svd.VT;
+            projection = -svd.VT; // The sign is inverted to make it identical to the implementation of Accord.NET.
         }
 
         public Vector<double> Transform(Vector<double> x)

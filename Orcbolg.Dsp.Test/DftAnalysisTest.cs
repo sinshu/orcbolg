@@ -5,9 +5,9 @@ using System.Numerics;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Orcbolg.Recog;
+using Orcbolg.Dsp;
 
-namespace Orcbolg.Recog.Test
+namespace Orcbolg.Dsp.Test
 {
     [TestClass]
     public class DftAnalysisTest

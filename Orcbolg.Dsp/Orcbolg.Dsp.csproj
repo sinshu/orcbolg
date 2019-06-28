@@ -55,6 +55,7 @@
     <Compile Include="AsioDspDriver.cs" />
     <Compile Include="AsioDspSetting.cs" />
     <Compile Include="Bypass.cs" />
+    <Compile Include="DftAnalysis.cs" />
     <Compile Include="DspBuffer.cs" />
     <Compile Include="DspBufferEntry.cs" />
     <Compile Include="DspException.cs" />

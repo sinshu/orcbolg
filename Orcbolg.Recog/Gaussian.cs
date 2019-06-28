@@ -45,6 +45,14 @@ namespace Orcbolg.Recog
             return Math.Sqrt(d * cholesky.Solve(d));
         }
 
+        public double Bhattacharyya(Gaussian gaussian)
+        {
+            var meanCovarianceCholesky = ((covariance + gaussian.covariance) / 2).Cholesky();
+            var d = gaussian.mean - mean;
+            var m = d * meanCovarianceCholesky.Solve(d);
+            return m / 8 + (meanCovarianceCholesky.DeterminantLn - (cholesky.DeterminantLn + gaussian.cholesky.DeterminantLn) / 2) / 2;
+        }
+
         public Vector<double> Mean
         {
             get
