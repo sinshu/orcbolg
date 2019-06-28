@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DftAnalysis.cs" />
+    <Compile Include="Gaussian.cs" />
     <Compile Include="Pca.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stats.cs" />
