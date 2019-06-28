@@ -209,5 +209,22 @@ namespace Orcbolg.Recog.Test
             var error = actual - expected;
             Assert.IsTrue(error < maxError);
         }
+
+        [TestMethod]
+        public void SerializeDeserialize()
+        {
+            foreach (var xs in EnumTestData())
+            {
+                var gaussian1 = new Gaussian(xs);
+                var data = gaussian1.Serialize();
+                var gaussian2 = Gaussian.Deserialize(data);
+
+                var meanError = gaussian1.Mean - gaussian2.Mean;
+                Assert.IsTrue(meanError.L2Norm() < maxError);
+
+                var covError = gaussian1.Covariance - gaussian2.Covariance;
+                Assert.IsTrue(covError.L2Norm() < maxError);
+            }
+        }
     }
 }
