@@ -10,7 +10,7 @@ using Orcbolg.Recog;
 namespace Orcbolg.Recog.Test
 {
     [TestClass]
-    public class SpectralAnalysisTest
+    public class DftAnalysisTest
     {
         [TestMethod]
         public void GetNormalizedAmplitude1()
