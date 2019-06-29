@@ -90,7 +90,7 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var actualGaussian = new Gaussian(xs);
+                var actualGaussian = Gaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
                 expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
                 var actualMean = actualGaussian.Mean;
@@ -110,7 +110,7 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var mean = xs.Mean();
-                var actualGaussian = new Gaussian(xs);
+                var actualGaussian = Gaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
                 expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
 
@@ -132,7 +132,7 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var mean = xs.Mean();
-                var actualGaussian = new Gaussian(xs);
+                var actualGaussian = Gaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
                 expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
 
@@ -149,11 +149,32 @@ namespace Orcbolg.Recog.Test
         }
 
         [TestMethod]
-        public void Mahalanobis()
+        public void Mahalanobis1()
         {
             var xs = CreateTestData1();
             var mean = xs.Mean();
-            var actualGaussian = new Gaussian(xs);
+            var actualGaussian = Gaussian.FromVectors(xs);
+            var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
+            expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+
+            var random = new Random(4567);
+            for (var i = 0; i < 10; i++)
+            {
+                var x = mean + DenseVector.OfEnumerable(Enumerable.Range(0, xs[0].Count).Select(d => 10 * random.NextDouble() - 5));
+                var actual = actualGaussian.Mahalanobis(x);
+                var expected = Math.Sqrt(expectedGaussian.Mahalanobis(x.ToArray()));
+                var error = actual - expected;
+                Assert.IsTrue(error < maxError);
+            }
+        }
+
+        [TestMethod]
+        public void Mahalanobis2()
+        {
+            var xs = CreateTestData1();
+            var mean = xs.Mean();
+            var covariance = xs.Covariance();
+            var actualGaussian = Gaussian.FromMeanAndCovariance(mean, covariance);
             var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
             expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
 
@@ -174,8 +195,8 @@ namespace Orcbolg.Recog.Test
             var xs1 = CreateTestData1();
             var xs2 = CreateTestData2();
 
-            var actualGaussian1 = new Gaussian(xs1);
-            var actualGaussian2 = new Gaussian(xs2);
+            var actualGaussian1 = Gaussian.FromVectors(xs1);
+            var actualGaussian2 = Gaussian.FromVectors(xs2);
 
             var expectedGaussian1 = new MultivariateNormalDistribution(xs1[0].Count);
             expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray());
@@ -195,8 +216,8 @@ namespace Orcbolg.Recog.Test
             var xs1 = CreateTestData2();
             var xs2 = CreateTestData3();
 
-            var actualGaussian1 = new Gaussian(xs1);
-            var actualGaussian2 = new Gaussian(xs2);
+            var actualGaussian1 = Gaussian.FromVectors(xs1);
+            var actualGaussian2 = Gaussian.FromVectors(xs2);
 
             var expectedGaussian1 = new MultivariateNormalDistribution(xs1[0].Count);
             expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray());
@@ -215,7 +236,7 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var gaussian1 = new Gaussian(xs);
+                var gaussian1 = Gaussian.FromVectors(xs);
                 var data = gaussian1.Serialize();
                 var gaussian2 = Gaussian.Deserialize(data);
 

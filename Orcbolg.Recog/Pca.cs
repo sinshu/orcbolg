@@ -11,30 +11,42 @@ namespace Orcbolg.Recog
     public sealed class Pca
     {
         private Vector<double> mean;
-        private Matrix<double> covariance;
         private Matrix<double> projection;
 
-        public Pca(IReadOnlyList<Vector<double>> xs)
+        private Pca()
         {
-            mean = Stats.Mean(xs);
-            covariance = Stats.Covariance(xs, mean);
-            var svd = covariance.Svd();
-            projection = svd.VT;
         }
 
-        public Pca(Vector<double> mean, Matrix<double> covariance)
+        public static Pca FromVectors(IReadOnlyList<Vector<double>> xs)
         {
-            this.mean = mean;
-            this.covariance = covariance;
+            var mean = Stats.Mean(xs);
+            var covariance = Stats.Covariance(xs, mean);
             var svd = covariance.Svd();
-            projection = svd.VT;
+            var projection = svd.VT;
+
+            var pca = new Pca();
+            pca.mean = mean;
+            pca.projection = projection;
+            return pca;
         }
 
-        public Pca(Vector<double> mean, Matrix<double> covariance, Matrix<double> projection)
+        public static Pca FromMeanAndCovariance(Vector<double> mean, Matrix<double> covariance)
         {
-            this.mean = mean;
-            this.covariance = covariance;
-            this.projection = projection;
+            var svd = covariance.Svd();
+            var projection = svd.VT;
+
+            var pca = new Pca();
+            pca.mean = mean;
+            pca.projection = projection;
+            return pca;
+        }
+
+        public static Pca FromMeanAndProjection(Vector<double> mean, Matrix<double> projection)
+        {
+            var pca = new Pca();
+            pca.mean = mean;
+            pca.projection = projection;
+            return pca;
         }
 
         public IEnumerable<string> Serialize()
@@ -42,11 +54,6 @@ namespace Orcbolg.Recog
             yield return "Pca";
             yield return "Mean";
             yield return string.Join(",", mean);
-            yield return "Covariance";
-            foreach (var row in covariance.EnumerateRows())
-            {
-                yield return string.Join(",", row);
-            }
             yield return "Projection";
             foreach (var row in projection.EnumerateRows())
             {
@@ -82,9 +89,9 @@ namespace Orcbolg.Recog
 
                 enumerator.MoveNext();
                 header = enumerator.Current;
-                if (header != "Covariance")
+                if (header != "Projection")
                 {
-                    throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
+                    throw new Exception("Invalid header (expected: Projection, actual: " + header + ").");
                 }
 
                 var rows = new List<double[]>();
@@ -94,9 +101,9 @@ namespace Orcbolg.Recog
                     var line = enumerator.Current;
                     rows.Add(line.Split(',').Select(x => double.Parse(x)).ToArray());
                 }
-                var covariance = DenseMatrix.OfRowArrays(rows);
+                var projection = DenseMatrix.OfRowArrays(rows);
 
-                return new Pca(mean, covariance);
+                return FromMeanAndProjection(mean, projection);
             }
         }
 
@@ -115,14 +122,6 @@ namespace Orcbolg.Recog
             get
             {
                 return mean;
-            }
-        }
-
-        public Matrix<double> Covariance
-        {
-            get
-            {
-                return covariance;
             }
         }
 

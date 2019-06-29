@@ -85,11 +85,30 @@ namespace Orcbolg.Recog.Test
         }
 
         [TestMethod]
-        public void Projection()
+        public void Projection1()
         {
             foreach (var xs in EnumTestData())
             {
-                var actualPca = new Pca(xs);
+                var actualPca = Pca.FromVectors(xs);
+                var expectedPca = new PrincipalComponentAnalysis();
+                expectedPca.Learn(xs.Select(x => x.ToArray()).ToArray());
+                var actual = actualPca.Projection;
+                var expected = DenseMatrix.OfRowArrays(expectedPca.ComponentVectors);
+                var error1 = actual - expected;
+                var error2 = actual + expected;
+                var error = error1.EnumerateRows().Zip(error2.EnumerateRows(), (r1, r2) => Math.Min(r1.L2Norm(), r2.L2Norm()));
+                Assert.IsTrue(error.All(e => e < maxError));
+            }
+        }
+
+        [TestMethod]
+        public void Projection2()
+        {
+            foreach (var xs in EnumTestData())
+            {
+                var mean = xs.Mean();
+                var covariance = xs.Covariance();
+                var actualPca = Pca.FromMeanAndCovariance(mean, covariance);
                 var expectedPca = new PrincipalComponentAnalysis();
                 expectedPca.Learn(xs.Select(x => x.ToArray()).ToArray());
                 var actual = actualPca.Projection;
@@ -109,9 +128,8 @@ namespace Orcbolg.Recog.Test
                 var expectedPca = new PrincipalComponentAnalysis();
                 expectedPca.Learn(xs.Select(x => x.ToArray()).ToArray());
                 var mean = DenseVector.OfArray(expectedPca.Means);
-                var covariance = DenseMatrix.CreateIdentity(mean.Count);
                 var projection = DenseMatrix.OfRowArrays(expectedPca.ComponentVectors);
-                var actualPca = new Pca(mean, covariance, projection);
+                var actualPca = Pca.FromMeanAndProjection(mean, projection);
 
                 var random = new Random(4567);
                 for (var i = 0; i < 10; i++)
@@ -133,9 +151,8 @@ namespace Orcbolg.Recog.Test
                 var expectedPca = new PrincipalComponentAnalysis();
                 expectedPca.Learn(xs.Select(x => x.ToArray()).ToArray());
                 var mean = DenseVector.OfArray(expectedPca.Means);
-                var covariance = DenseMatrix.CreateIdentity(mean.Count);
                 var projection = DenseMatrix.OfRowArrays(expectedPca.ComponentVectors);
-                var actualPca = new Pca(mean, covariance, projection);
+                var actualPca = Pca.FromMeanAndProjection(mean, projection);
 
                 var random = new Random(4567);
                 for (var i = 0; i < 10; i++)
@@ -154,15 +171,12 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var pca1 = new Pca(xs);
+                var pca1 = Pca.FromVectors(xs);
                 var data = pca1.Serialize();
                 var pca2 = Pca.Deserialize(data);
 
                 var meanError = pca1.Mean - pca2.Mean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);
-
-                var covError = pca1.Covariance - pca2.Covariance;
-                Assert.IsTrue(covError.L2Norm() < maxError);
 
                 var projError = pca1.Projection - pca2.Projection;
                 Assert.IsTrue(projError.L2Norm() < maxError);

@@ -15,24 +15,41 @@ namespace Orcbolg.Recog
         private Cholesky<double> cholesky;
         private double logNormalizationTerm;
 
-        public Gaussian(IReadOnlyList<Vector<double>> xs) : this(xs, 0)
+        private Gaussian()
         {
         }
 
-        public Gaussian(IReadOnlyList<Vector<double>> xs, double regularization)
+        public static Gaussian FromVectors(IReadOnlyList<Vector<double>> xs)
         {
-            mean = Stats.Mean(xs);
-            covariance = Stats.Covariance(xs, mean) + regularization * DenseMatrix.CreateIdentity(mean.Count);
-            cholesky = covariance.Cholesky();
-            logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+            return FromVectors(xs, 0);
         }
 
-        public Gaussian(Vector<double> mean, Matrix<double> covariance)
+        public static Gaussian FromVectors(IReadOnlyList<Vector<double>> xs, double regularization)
         {
-            this.mean = mean;
-            this.covariance = covariance;
-            cholesky = covariance.Cholesky();
-            logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+            var mean = Stats.Mean(xs);
+            var covariance = Stats.Covariance(xs, mean) + regularization * DenseMatrix.CreateIdentity(mean.Count);
+            var cholesky = covariance.Cholesky();
+            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+
+            var gaussian = new Gaussian();
+            gaussian.mean = mean;
+            gaussian.covariance = covariance;
+            gaussian.cholesky = cholesky;
+            gaussian.logNormalizationTerm = logNormalizationTerm;
+            return gaussian;
+        }
+
+        public static Gaussian FromMeanAndCovariance(Vector<double> mean, Matrix<double> covariance)
+        {
+            var cholesky = covariance.Cholesky();
+            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+
+            var gaussian = new Gaussian();
+            gaussian.mean = mean;
+            gaussian.covariance = covariance;
+            gaussian.cholesky = cholesky;
+            gaussian.logNormalizationTerm = logNormalizationTerm;
+            return gaussian;
         }
 
         public double Pdf(Vector<double> x)
@@ -115,7 +132,7 @@ namespace Orcbolg.Recog
                 }
                 var covariance = DenseMatrix.OfRowArrays(rows);
 
-                return new Gaussian(mean, covariance);
+                return FromMeanAndCovariance(mean, covariance);
             }
         }
 
