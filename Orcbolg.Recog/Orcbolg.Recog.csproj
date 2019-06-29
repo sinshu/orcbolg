@@ -40,7 +40,9 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calc.cs" />
     <Compile Include="DiagonalGaussian.cs" />
+    <Compile Include="DiagonalGmm.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="Pca.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

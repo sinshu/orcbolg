@@ -51,7 +51,6 @@ namespace Orcbolg.Recog
 
         public IEnumerable<string> Serialize()
         {
-            yield return "Pca";
             yield return "Mean";
             yield return string.Join(",", mean);
             yield return "Projection";
@@ -63,21 +62,15 @@ namespace Orcbolg.Recog
 
         public static Pca Deserialize(IEnumerable<string> source)
         {
-            string header;
             using (var enumerator = source.GetEnumerator())
             {
                 enumerator.MoveNext();
-                header = enumerator.Current;
-                if (header != "Pca")
                 {
-                    throw new Exception("Invalid header (expected: Pca, actual: " + header + ").");
-                }
-
-                enumerator.MoveNext();
-                header = enumerator.Current;
-                if (header != "Mean")
-                {
-                    throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
+                    var header = enumerator.Current;
+                    if (header != "Mean")
+                    {
+                        throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
+                    }
                 }
 
                 enumerator.MoveNext();
@@ -88,10 +81,12 @@ namespace Orcbolg.Recog
                 }
 
                 enumerator.MoveNext();
-                header = enumerator.Current;
-                if (header != "Projection")
                 {
-                    throw new Exception("Invalid header (expected: Projection, actual: " + header + ").");
+                    var header = enumerator.Current;
+                    if (header != "Projection")
+                    {
+                        throw new Exception("Invalid header (expected: Projection, actual: " + header + ").");
+                    }
                 }
 
                 var rows = new List<double[]>();
