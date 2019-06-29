@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -78,57 +79,45 @@ namespace Orcbolg.Recog
             return m / 8 + (meanCovarianceCholesky.DeterminantLn - (cholesky.DeterminantLn + gaussian.cholesky.DeterminantLn) / 2) / 2;
         }
 
-        public IEnumerable<string> Serialize()
+        public void Serialize(TextWriter writer)
         {
-            yield return "Mean";
-            yield return string.Join(",", mean);
-            yield return "Covariance";
+            writer.WriteLine("Mean");
+            writer.WriteLine(string.Join(",", mean));
+            writer.WriteLine("Covariance");
             foreach (var row in covariance.EnumerateRows())
             {
-                yield return string.Join(",", row);
+                writer.WriteLine(string.Join(",", row));
             }
         }
 
-        public static Gaussian Deserialize(IEnumerable<string> source)
+        public static Gaussian Deserialize(TextReader reader)
         {
-            using (var enumerator = source.GetEnumerator())
             {
-                enumerator.MoveNext();
+                var header = reader.ReadLine();
+                if (header != "Mean")
                 {
-                    var header = enumerator.Current;
-                    if (header != "Mean")
-                    {
-                        throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
-                    }
+                    throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
                 }
-
-                enumerator.MoveNext();
-                Vector<double> mean;
-                {
-                    var line = enumerator.Current;
-                    mean = DenseVector.OfEnumerable(line.Split(',').Select(x => double.Parse(x)));
-                }
-
-                enumerator.MoveNext();
-                {
-                    var header = enumerator.Current;
-                    if (header != "Covariance")
-                    {
-                        throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
-                    }
-                }
-
-                var rows = new List<double[]>();
-                for (var i = 0; i < mean.Count; i++)
-                {
-                    enumerator.MoveNext();
-                    var line = enumerator.Current;
-                    rows.Add(line.Split(',').Select(x => double.Parse(x)).ToArray());
-                }
-                var covariance = DenseMatrix.OfRowArrays(rows);
-
-                return FromMeanAndCovariance(mean, covariance);
             }
+
+            var mean = DenseVector.OfEnumerable(reader.ReadLine().Split(',').Select(x => double.Parse(x)));
+
+            {
+                var header = reader.ReadLine();
+                if (header != "Covariance")
+                {
+                    throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
+                }
+            }
+
+            var rows = new List<double[]>();
+            for (var i = 0; i < mean.Count; i++)
+            {
+                rows.Add(reader.ReadLine().Split(',').Select(x => double.Parse(x)).ToArray());
+            }
+            var covariance = DenseMatrix.OfRowArrays(rows);
+
+            return FromMeanAndCovariance(mean, covariance);
         }
 
         public Vector<double> Mean

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -79,52 +80,37 @@ namespace Orcbolg.Recog
             return m / 8 + (meanVarianceLogDeterminant - (logDeterminant + gaussian.logDeterminant) / 2) / 2;
         }
 
-        public IEnumerable<string> Serialize()
+        public void Serialize(TextWriter writer)
         {
-            yield return "Mean";
-            yield return string.Join(",", mean);
-            yield return "Variance";
-            yield return string.Join(",", variance);
+            writer.WriteLine("Mean");
+            writer.WriteLine(string.Join(",", mean));
+            writer.WriteLine("Variance");
+            writer.WriteLine(string.Join(",", variance));
         }
 
-        public static DiagonalGaussian Deserialize(IEnumerable<string> source)
+        public static DiagonalGaussian Deserialize(TextReader reader)
         {
-            using (var enumerator = source.GetEnumerator())
             {
-                enumerator.MoveNext();
+                var header = reader.ReadLine();
+                if (header != "Mean")
                 {
-                    var header = enumerator.Current;
-                    if (header != "Mean")
-                    {
-                        throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
-                    }
+                    throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
                 }
-
-                enumerator.MoveNext();
-                Vector<double> mean;
-                {
-                    var line = enumerator.Current;
-                    mean = DenseVector.OfEnumerable(line.Split(',').Select(x => double.Parse(x)));
-                }
-
-                enumerator.MoveNext();
-                {
-                    var header = enumerator.Current;
-                    if (header != "Variance")
-                    {
-                        throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
-                    }
-                }
-
-                enumerator.MoveNext();
-                Vector<double> variance;
-                {
-                    var line = enumerator.Current;
-                    variance = DenseVector.OfEnumerable(line.Split(',').Select(x => double.Parse(x)));
-                }
-
-                return FromMeanAndVariance(mean, variance);
             }
+
+            var mean = DenseVector.OfEnumerable(reader.ReadLine().Split(',').Select(x => double.Parse(x)));
+
+            {
+                var header = reader.ReadLine();
+                if (header != "Variance")
+                {
+                    throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
+                }
+            }
+
+            var variance = DenseVector.OfEnumerable(reader.ReadLine().Split(',').Select(x => double.Parse(x)));
+
+            return FromMeanAndVariance(mean, variance);
         }
 
         public Vector<double> Mean

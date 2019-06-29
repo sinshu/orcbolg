@@ -12,6 +12,6 @@ static class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine(Calc.Log1p(1.0E-2));
+        Console.WriteLine("test");
     }
 }

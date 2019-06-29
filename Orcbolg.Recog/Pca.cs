@@ -49,57 +49,45 @@ namespace Orcbolg.Recog
             return pca;
         }
 
-        public IEnumerable<string> Serialize()
+        public void Serialize(TextWriter writer)
         {
-            yield return "Mean";
-            yield return string.Join(",", mean);
-            yield return "Projection";
+            writer.WriteLine("Mean");
+            writer.WriteLine(string.Join(",", mean));
+            writer.WriteLine("Projection");
             foreach (var row in projection.EnumerateRows())
             {
-                yield return string.Join(",", row);
+                writer.WriteLine(string.Join(",", row));
             }
         }
 
-        public static Pca Deserialize(IEnumerable<string> source)
+        public static Pca Deserialize(TextReader reader)
         {
-            using (var enumerator = source.GetEnumerator())
             {
-                enumerator.MoveNext();
+                var header = reader.ReadLine();
+                if (header != "Mean")
                 {
-                    var header = enumerator.Current;
-                    if (header != "Mean")
-                    {
-                        throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
-                    }
+                    throw new Exception("Invalid header (expected: Mean, actual: " + header + ").");
                 }
-
-                enumerator.MoveNext();
-                Vector<double> mean;
-                {
-                    var line = enumerator.Current;
-                    mean = DenseVector.OfEnumerable(line.Split(',').Select(x => double.Parse(x)));
-                }
-
-                enumerator.MoveNext();
-                {
-                    var header = enumerator.Current;
-                    if (header != "Projection")
-                    {
-                        throw new Exception("Invalid header (expected: Projection, actual: " + header + ").");
-                    }
-                }
-
-                var rows = new List<double[]>();
-                for (var i = 0; i < mean.Count; i++)
-                {
-                    enumerator.MoveNext();
-                    var line = enumerator.Current;
-                    rows.Add(line.Split(',').Select(x => double.Parse(x)).ToArray());
-                }
-                var projection = DenseMatrix.OfRowArrays(rows);
-
-                return FromMeanAndProjection(mean, projection);
             }
+
+            var mean = DenseVector.OfEnumerable(reader.ReadLine().Split(',').Select(x => double.Parse(x))); ;
+
+            {
+                var header = reader.ReadLine();
+                if (header != "Projection")
+                {
+                    throw new Exception("Invalid header (expected: Projection, actual: " + header + ").");
+                }
+            }
+
+            var rows = new List<double[]>();
+            for (var i = 0; i < mean.Count; i++)
+            {
+                rows.Add(reader.ReadLine().Split(',').Select(x => double.Parse(x)).ToArray());
+            }
+            var projection = DenseMatrix.OfRowArrays(rows);
+
+            return FromMeanAndProjection(mean, projection);
         }
 
         public Vector<double> Transform(Vector<double> x)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -172,8 +173,16 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var pca1 = Pca.FromVectors(xs);
-                var data = pca1.Serialize();
-                var pca2 = Pca.Deserialize(data);
+                using (var writer = new StreamWriter("pca.csv"))
+                {
+                    pca1.Serialize(writer);
+                }
+
+                Pca pca2;
+                using (var reader = new StreamReader("pca.csv"))
+                {
+                    pca2 = Pca.Deserialize(reader);
+                }
 
                 var meanError = pca1.Mean - pca2.Mean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);

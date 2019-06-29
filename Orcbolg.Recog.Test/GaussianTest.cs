@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -237,8 +238,16 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var gaussian1 = Gaussian.FromVectors(xs);
-                var data = gaussian1.Serialize();
-                var gaussian2 = Gaussian.Deserialize(data);
+                using (var writer = new StreamWriter("gaussian.csv"))
+                {
+                    gaussian1.Serialize(writer);
+                }
+
+                Gaussian gaussian2;
+                using (var reader = new StreamReader("gaussian.csv"))
+                {
+                    gaussian2 = Gaussian.Deserialize(reader);
+                }
 
                 var meanError = gaussian1.Mean - gaussian2.Mean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);

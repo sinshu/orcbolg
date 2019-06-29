@@ -9,11 +9,12 @@ using Accord.Statistics.Distributions.Fitting;
 using Accord.Statistics.Distributions.Multivariate;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orcbolg.Recog;
+using System.IO;
 
 namespace Orcbolg.Recog.Test
 {
     [TestClass]
-    public class GiagonalGaussianTest
+    public class DiagonalGaussianTest
     {
         private static readonly double maxError = 1.0E-9;
 
@@ -254,8 +255,16 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var gaussian1 = DiagonalGaussian.FromVectors(xs);
-                var data = gaussian1.Serialize();
-                var gaussian2 = DiagonalGaussian.Deserialize(data);
+                using (var writer = new StreamWriter("diagonalgaussian.csv"))
+                {
+                    gaussian1.Serialize(writer);
+                }
+
+                DiagonalGaussian gaussian2;
+                using (var reader = new StreamReader("diagonalgaussian.csv"))
+                {
+                    gaussian2 = DiagonalGaussian.Deserialize(reader);
+                }
 
                 var meanError = gaussian1.Mean - gaussian2.Mean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);
