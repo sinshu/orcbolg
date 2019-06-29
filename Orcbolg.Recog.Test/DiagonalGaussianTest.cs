@@ -5,6 +5,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Accord.Math.Distances;
+using Accord.Statistics.Distributions.Fitting;
 using Accord.Statistics.Distributions.Multivariate;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orcbolg.Recog;
@@ -12,9 +13,9 @@ using Orcbolg.Recog;
 namespace Orcbolg.Recog.Test
 {
     [TestClass]
-    public class GaussianTest
+    public class GiagonalGaussianTest
     {
-        private static readonly double maxError = 1.0E-8;
+        private static readonly double maxError = 1.0E-9;
 
         private static IReadOnlyList<Vector<double>> CreateTestData1()
         {
@@ -90,16 +91,18 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var actualGaussian = Gaussian.FromVectors(xs);
+                var actualGaussian = DiagonalGaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
-                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+                var options = new NormalOptions();
+                options.Diagonal = true;
+                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray(), options);
                 var actualMean = actualGaussian.Mean;
-                var actualCov = actualGaussian.Covariance;
+                var actualVar = actualGaussian.Variance;
                 var expectedMean = DenseVector.OfArray(expectedGaussian.Mean);
-                var expectedCov = DenseMatrix.OfArray(expectedGaussian.Covariance);
+                var expectedVar = DenseVector.OfArray(expectedGaussian.Variance);
                 var meanError = actualMean - expectedMean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);
-                var covError = actualCov - expectedCov;
+                var covError = actualVar - expectedVar;
                 Assert.IsTrue(covError.L2Norm() < maxError);
             }
         }
@@ -110,9 +113,11 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var mean = xs.Mean();
-                var actualGaussian = Gaussian.FromVectors(xs);
+                var actualGaussian = DiagonalGaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
-                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+                var options = new NormalOptions();
+                options.Diagonal = true;
+                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray(), options);
 
                 var random = new Random(4567);
                 for (var i = 0; i < 10; i++)
@@ -132,9 +137,11 @@ namespace Orcbolg.Recog.Test
             foreach (var xs in EnumTestData())
             {
                 var mean = xs.Mean();
-                var actualGaussian = Gaussian.FromVectors(xs);
+                var actualGaussian = DiagonalGaussian.FromVectors(xs);
                 var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
-                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+                var options = new NormalOptions();
+                options.Diagonal = true;
+                expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray(), options);
 
                 var random = new Random(4567);
                 for (var i = 0; i < 10; i++)
@@ -153,9 +160,11 @@ namespace Orcbolg.Recog.Test
         {
             var xs = CreateTestData1();
             var mean = xs.Mean();
-            var actualGaussian = Gaussian.FromVectors(xs);
+            var actualGaussian = DiagonalGaussian.FromVectors(xs);
             var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
-            expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+            var options = new NormalOptions();
+            options.Diagonal = true;
+            expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray(), options);
 
             var random = new Random(4567);
             for (var i = 0; i < 10; i++)
@@ -173,10 +182,12 @@ namespace Orcbolg.Recog.Test
         {
             var xs = CreateTestData1();
             var mean = xs.Mean();
-            var covariance = xs.Covariance();
-            var actualGaussian = Gaussian.FromMeanAndCovariance(mean, covariance);
+            var variance = xs.Variance();
+            var actualGaussian = DiagonalGaussian.FromMeanAndVariance(mean, variance);
             var expectedGaussian = new MultivariateNormalDistribution(xs[0].Count);
-            expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray());
+            var options = new NormalOptions();
+            options.Diagonal = true;
+            expectedGaussian.Fit(xs.Select(x => x.ToArray()).ToArray(), options);
 
             var random = new Random(4567);
             for (var i = 0; i < 10; i++)
@@ -184,7 +195,9 @@ namespace Orcbolg.Recog.Test
                 var x = mean + DenseVector.OfEnumerable(Enumerable.Range(0, xs[0].Count).Select(d => 10 * random.NextDouble() - 5));
                 var actual = actualGaussian.Mahalanobis(x);
                 var expected = Math.Sqrt(expectedGaussian.Mahalanobis(x.ToArray()));
+                Console.WriteLine(actual + ", " + expected);
                 var error = actual - expected;
+                Console.WriteLine(error);
                 Assert.IsTrue(Math.Abs(error) < maxError);
             }
         }
@@ -195,13 +208,15 @@ namespace Orcbolg.Recog.Test
             var xs1 = CreateTestData1();
             var xs2 = CreateTestData2();
 
-            var actualGaussian1 = Gaussian.FromVectors(xs1);
-            var actualGaussian2 = Gaussian.FromVectors(xs2);
+            var actualGaussian1 = DiagonalGaussian.FromVectors(xs1);
+            var actualGaussian2 = DiagonalGaussian.FromVectors(xs2);
 
+            var options = new NormalOptions();
+            options.Diagonal = true;
             var expectedGaussian1 = new MultivariateNormalDistribution(xs1[0].Count);
-            expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray());
+            expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray(), options);
             var expectedGaussian2 = new MultivariateNormalDistribution(xs2[0].Count);
-            expectedGaussian2.Fit(xs2.Select(x => x.ToArray()).ToArray());
+            expectedGaussian2.Fit(xs2.Select(x => x.ToArray()).ToArray(), options);
             var b = new Bhattacharyya();
 
             var actual = actualGaussian1.Bhattacharyya(actualGaussian2);
@@ -216,13 +231,15 @@ namespace Orcbolg.Recog.Test
             var xs1 = CreateTestData2();
             var xs2 = CreateTestData3();
 
-            var actualGaussian1 = Gaussian.FromVectors(xs1);
-            var actualGaussian2 = Gaussian.FromVectors(xs2);
+            var actualGaussian1 = DiagonalGaussian.FromVectors(xs1);
+            var actualGaussian2 = DiagonalGaussian.FromVectors(xs2);
 
+            var options = new NormalOptions();
+            options.Diagonal = true;
             var expectedGaussian1 = new MultivariateNormalDistribution(xs1[0].Count);
-            expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray());
+            expectedGaussian1.Fit(xs1.Select(x => x.ToArray()).ToArray(), options);
             var expectedGaussian2 = new MultivariateNormalDistribution(xs2[0].Count);
-            expectedGaussian2.Fit(xs2.Select(x => x.ToArray()).ToArray());
+            expectedGaussian2.Fit(xs2.Select(x => x.ToArray()).ToArray(), options);
             var b = new Bhattacharyya();
 
             var actual = actualGaussian1.Bhattacharyya(actualGaussian2);
@@ -236,15 +253,15 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var gaussian1 = Gaussian.FromVectors(xs);
+                var gaussian1 = DiagonalGaussian.FromVectors(xs);
                 var data = gaussian1.Serialize();
-                var gaussian2 = Gaussian.Deserialize(data);
+                var gaussian2 = DiagonalGaussian.Deserialize(data);
 
                 var meanError = gaussian1.Mean - gaussian2.Mean;
                 Assert.IsTrue(meanError.L2Norm() < maxError);
 
-                var covError = gaussian1.Covariance - gaussian2.Covariance;
-                Assert.IsTrue(covError.L2Norm() < maxError);
+                var varError = gaussian1.Variance - gaussian2.Variance;
+                Assert.IsTrue(varError.L2Norm() < maxError);
             }
         }
 
@@ -253,9 +270,9 @@ namespace Orcbolg.Recog.Test
         {
             foreach (var xs in EnumTestData())
             {
-                var gaussian = Gaussian.FromVectors(xs, 3);
-                var actual = gaussian.Covariance;
-                var expected = xs.Covariance() + 3 * DenseMatrix.CreateIdentity(xs[0].Count);
+                var gaussian = DiagonalGaussian.FromVectors(xs, 3);
+                var actual = gaussian.Variance;
+                var expected = xs.Variance() + DenseVector.OfEnumerable(Enumerable.Range(0, xs[0].Count).Select(i => 3.0));
                 var error = actual - expected;
                 Assert.IsTrue(error.L2Norm() < maxError);
             }

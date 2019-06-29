@@ -5,7 +5,6 @@ using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using Accord.Statistics.Analysis;
 using Orcbolg.Dsp;
 using Orcbolg.Recog;
 

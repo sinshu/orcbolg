@@ -8,46 +8,46 @@ using MathNet.Numerics.LinearAlgebra.Factorization;
 
 namespace Orcbolg.Recog
 {
-    public sealed class Gaussian
+    public sealed class DiagonalGaussian
     {
         private Vector<double> mean;
-        private Matrix<double> covariance;
-        private Cholesky<double> cholesky;
+        private Vector<double> variance;
+        private double logDeterminant;
         private double logNormalizationTerm;
 
-        private Gaussian()
+        private DiagonalGaussian()
         {
         }
 
-        public static Gaussian FromVectors(IReadOnlyList<Vector<double>> xs)
+        public static DiagonalGaussian FromVectors(IReadOnlyList<Vector<double>> xs)
         {
             return FromVectors(xs, 0);
         }
 
-        public static Gaussian FromVectors(IReadOnlyList<Vector<double>> xs, double regularization)
+        public static DiagonalGaussian FromVectors(IReadOnlyList<Vector<double>> xs, double regularization)
         {
             var mean = Stats.Mean(xs);
-            var covariance = Stats.Covariance(xs, mean) + DenseMatrix.CreateDiagonal(mean.Count, mean.Count, regularization);
-            var cholesky = covariance.Cholesky();
-            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+            var variance = Stats.Variance(xs, mean) + DenseVector.Create(mean.Count, regularization);
+            var logDeterminant = variance.Select(a => Math.Log(a)).Sum();
+            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + logDeterminant) / 2;
 
-            var gaussian = new Gaussian();
+            var gaussian = new DiagonalGaussian();
             gaussian.mean = mean;
-            gaussian.covariance = covariance;
-            gaussian.cholesky = cholesky;
+            gaussian.variance = variance;
+            gaussian.logDeterminant = logDeterminant;
             gaussian.logNormalizationTerm = logNormalizationTerm;
             return gaussian;
         }
 
-        public static Gaussian FromMeanAndCovariance(Vector<double> mean, Matrix<double> covariance)
+        public static DiagonalGaussian FromMeanAndVariance(Vector<double> mean, Vector<double> variance)
         {
-            var cholesky = covariance.Cholesky();
-            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + cholesky.DeterminantLn) / 2;
+            var logDeterminant = variance.Select(a => Math.Log(a)).Sum();
+            var logNormalizationTerm = -(Math.Log(2 * Math.PI) * mean.Count + logDeterminant) / 2;
 
-            var gaussian = new Gaussian();
+            var gaussian = new DiagonalGaussian();
             gaussian.mean = mean;
-            gaussian.covariance = covariance;
-            gaussian.cholesky = cholesky;
+            gaussian.variance = variance;
+            gaussian.logDeterminant = logDeterminant;
             gaussian.logNormalizationTerm = logNormalizationTerm;
             return gaussian;
         }
@@ -60,44 +60,42 @@ namespace Orcbolg.Recog
         public double LogPdf(Vector<double> x)
         {
             var d = x - mean;
-            var m = d * cholesky.Solve(d);
+            var m = d.PointwiseDivide(variance) * d;
             return logNormalizationTerm - m / 2;
         }
 
         public double Mahalanobis(Vector<double> x)
         {
             var d = x - mean;
-            return Math.Sqrt(d * cholesky.Solve(d));
+            return Math.Sqrt(d.PointwiseDivide(variance) * d);
         }
 
-        public double Bhattacharyya(Gaussian gaussian)
+        public double Bhattacharyya(DiagonalGaussian gaussian)
         {
-            var meanCovarianceCholesky = ((covariance + gaussian.covariance) / 2).Cholesky();
+            var meanVariance = (variance + gaussian.variance) / 2;
+            var meanVarianceLogDeterminant = meanVariance.Select(a => Math.Log(a)).Sum();
             var d = gaussian.mean - mean;
-            var m = d * meanCovarianceCholesky.Solve(d);
-            return m / 8 + (meanCovarianceCholesky.DeterminantLn - (cholesky.DeterminantLn + gaussian.cholesky.DeterminantLn) / 2) / 2;
+            var m = d.PointwiseDivide(meanVariance) * d;
+            return m / 8 + (meanVarianceLogDeterminant - (logDeterminant + gaussian.logDeterminant) / 2) / 2;
         }
 
         public IEnumerable<string> Serialize()
         {
-            yield return "Gaussian";
+            yield return "DiagonalGaussian";
             yield return "Mean";
             yield return string.Join(",", mean);
-            yield return "Covariance";
-            foreach (var row in covariance.EnumerateRows())
-            {
-                yield return string.Join(",", row);
-            }
+            yield return "Variance";
+            yield return string.Join(",", variance);
         }
 
-        public static Gaussian Deserialize(IEnumerable<string> source)
+        public static DiagonalGaussian Deserialize(IEnumerable<string> source)
         {
             string header;
             using (var enumerator = source.GetEnumerator())
             {
                 enumerator.MoveNext();
                 header = enumerator.Current;
-                if (header != "Gaussian")
+                if (header != "DiagonalGaussian")
                 {
                     throw new Exception("Invalid header (expected: Gaussian, actual: " + header + ").");
                 }
@@ -118,21 +116,19 @@ namespace Orcbolg.Recog
 
                 enumerator.MoveNext();
                 header = enumerator.Current;
-                if (header != "Covariance")
+                if (header != "Variance")
                 {
                     throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
                 }
 
-                var rows = new List<double[]>();
-                for (var i = 0; i < mean.Count; i++)
+                enumerator.MoveNext();
+                Vector<double> variance;
                 {
-                    enumerator.MoveNext();
                     var line = enumerator.Current;
-                    rows.Add(line.Split(',').Select(x => double.Parse(x)).ToArray());
+                    variance = DenseVector.OfEnumerable(line.Split(',').Select(x => double.Parse(x)));
                 }
-                var covariance = DenseMatrix.OfRowArrays(rows);
 
-                return FromMeanAndCovariance(mean, covariance);
+                return FromMeanAndVariance(mean, variance);
             }
         }
 
@@ -144,11 +140,11 @@ namespace Orcbolg.Recog
             }
         }
 
-        public Matrix<double> Covariance
+        public Vector<double> Variance
         {
             get
             {
-                return covariance;
+                return variance;
             }
         }
     }
