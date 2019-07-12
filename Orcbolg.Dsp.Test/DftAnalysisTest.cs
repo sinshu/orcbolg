@@ -153,8 +153,8 @@ namespace Orcbolg.Dsp.Test
             for (var w = 2; w < frameLength / 2 + 1; w++)
             {
                 var lower = (double)(w - 2) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
-                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
-                var upper = (double)(w + 1) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
+                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
+                var upper = (double)(w + 1) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
                 var expected = (0.5 * source[w - 1] + 1.0 * source[w]) / 1.5;
                 var actual = DftAnalysis.GetEnergyWithTriangularFilter(source, sampleRate, frameLength, lower, center, upper);
                 Assert.AreEqual(expected, actual, 0.001);
@@ -170,9 +170,9 @@ namespace Orcbolg.Dsp.Test
             var source = Enumerable.Range(0, frameLength / 2 + 1).Select(t => random.NextDouble()).ToArray();
             for (var w = 4; w < frameLength / 2; w++)
             {
-                var lower = (double)(w - 4) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
-                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
-                var upper = (double)(w + 2) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
+                var lower = (double)(w - 4) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
+                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
+                var upper = (double)(w + 2) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
                 var expected = (0.25 * source[w - 3] + 0.5 * source[w - 2] + 0.75 * source[w - 1] + 1.0 * source[w] + 0.5 * source[w + 1]) / 3.0;
                 var actual = DftAnalysis.GetEnergyWithTriangularFilter(source, sampleRate, frameLength, lower, center, upper);
                 Assert.AreEqual(expected, actual, 0.001);
@@ -188,9 +188,9 @@ namespace Orcbolg.Dsp.Test
             var source = Enumerable.Range(0, frameLength / 2 + 1).Select(t => random.NextDouble()).ToArray();
             for (var w = 2; w < frameLength / 2 - 2; w++)
             {
-                var lower = (double)(w - 2) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
-                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
-                var upper = (double)(w + 4) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
+                var lower = (double)(w - 2) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
+                var center = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
+                var upper = (double)(w + 4) / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
                 var expected = (0.5 * source[w - 1] + 1.0 * source[w] + 0.75 * source[w + 1] + 0.5 * source[w + 2] + 0.25 * source[w + 3]) / 3.0;
                 var actual = DftAnalysis.GetEnergyWithTriangularFilter(source, sampleRate, frameLength, lower, center, upper);
                 Assert.AreEqual(expected, actual, 0.001);
@@ -206,7 +206,7 @@ namespace Orcbolg.Dsp.Test
             var source = Enumerable.Range(0, frameLength / 2 + 1).Select(t => random.NextDouble()).ToArray();
             for (var w = 0; w < frameLength / 2; w++)
             {
-                var freq = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000; ;
+                var freq = (double)w / frameLength * sampleRate + (random.NextDouble() - 0.5) / 1000000;
                 var expected = source[w];
                 var actual = DftAnalysis.GetEnergyWithTriangularFilter(source, sampleRate, frameLength, freq, freq, freq);
                 Assert.AreEqual(expected, actual, 0.001);

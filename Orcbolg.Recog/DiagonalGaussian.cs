@@ -104,7 +104,7 @@ namespace Orcbolg.Recog
                 var header = reader.ReadLine();
                 if (header != "Variance")
                 {
-                    throw new Exception("Invalid header (expected: Covariance, actual: " + header + ").");
+                    throw new Exception("Invalid header (expected: Variance, actual: " + header + ").");
                 }
             }
 

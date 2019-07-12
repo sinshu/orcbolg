@@ -4,6 +4,7 @@ using System.Linq;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using Accord.Math;
 using Accord.Statistics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orcbolg.Recog;
@@ -16,8 +17,11 @@ namespace Orcbolg.Recog.Test
         [TestMethod]
         public void Log1pTest()
         {
-            Assert.AreEqual(Calc.Log1p(1.0E-99), 1.0E-99, 1.0E-16);
-            Assert.AreEqual(Calc.Log1p(500), Math.Log(501), 1.0E-16);
+            for (var i = -10; i <= 10; i++)
+            {
+                var x = Math.Pow(10, i);
+                Assert.AreEqual(Special.Log1p(x), Calc.Log1p(x), 1.0E-16);
+            }
         }
 
         [TestMethod]
