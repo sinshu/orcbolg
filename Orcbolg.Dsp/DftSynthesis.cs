@@ -8,7 +8,7 @@ using MathNet.Numerics.IntegralTransforms;
 
 namespace Orcbolg.Dsp
 {
-    public static class Dft
+    public static class DftSynthesis
     {
         public static void Mirror(Complex[] dft)
         {

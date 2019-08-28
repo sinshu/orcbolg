@@ -75,7 +75,7 @@
     <Compile Include="OutputGain.cs" />
     <Compile Include="OverlapAdd.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Dft.cs" />
+    <Compile Include="DftSynthesis.cs" />
     <Compile Include="StftAnalysis.cs" />
     <Compile Include="StftSynthesis.cs" />
     <Compile Include="WaveFile.cs" />

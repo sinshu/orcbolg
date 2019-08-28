@@ -63,7 +63,7 @@
     <Compile Include="FramingTest.cs" />
     <Compile Include="MemoryDspDriverTest.cs" />
     <Compile Include="StftSynthesisTest.cs" />
-    <Compile Include="DftTest.cs" />
+    <Compile Include="DftSynthesisTest.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="WaveFileTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
