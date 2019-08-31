@@ -84,6 +84,12 @@ namespace Rockon
 
         private void PrintSetting()
         {
+            DebugWrite("========== ASIO ドライバ ==========");
+            foreach (var driverName in AsioDspDriver.EnumerateDriverNames())
+            {
+                DebugWrite(driverName);
+            }
+            DebugWrite("");
             DebugWrite("========== 基本設定 ==========");
             DebugWrite("設定ファイル: " + setting.CfgPath);
             DebugWrite("ドライバ名: " + dspComponent.DspDriver.DriverName + " (" + setting.DriverName + ")");

@@ -406,6 +406,8 @@ namespace Orcbolg.Dsp
                         return Read_Int32LSB;
                     case AsioSampleType.Int32LSB24:
                         return Read_Int32LSB24;
+                    case AsioSampleType.Int24LSB:
+                        return Read_Int24LSB;
                     default:
                         throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
@@ -419,6 +421,8 @@ namespace Orcbolg.Dsp
                         return Write_Int32LSB;
                     case AsioSampleType.Int32LSB24:
                         return Write_Int32LSB24;
+                    case AsioSampleType.Int24LSB:
+                        return Write_Int24LSB;
                     default:
                         throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
@@ -432,6 +436,8 @@ namespace Orcbolg.Dsp
                         return Clear_Int32LSB;
                     case AsioSampleType.Int32LSB24:
                         return Clear_Int32LSB24;
+                    case AsioSampleType.Int24LSB:
+                        return Clear_Int24LSB;
                     default:
                         throw new DspException("The ASIO sample type " + asioSampleType + " is not supported.");
                 }
@@ -525,6 +531,61 @@ namespace Orcbolg.Dsp
                     for (var t = 0; t < length; t++)
                     {
                         p[t] = 0;
+                    }
+                }
+            }
+
+            // This is for HX Stomp.
+            private static void Read_Int24LSB(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (byte*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        var offset = 3 * t;
+                        var value = (p[offset] << 8) | (p[offset + 1] << 16) | (p[offset + 2] << 24);
+                        buffer[t] = (float)value / 0x80000000L;
+                    }
+                }
+            }
+
+            // This is not yet tested.
+            private static void Write_Int24LSB(IntPtr ptr, float[] buffer, int length)
+            {
+                unsafe
+                {
+                    var p = (byte*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        var value = (long)(0x80000000L * buffer[t]);
+                        if (value > int.MaxValue)
+                        {
+                            value = int.MaxValue;
+                        }
+                        else if (value < int.MinValue)
+                        {
+                            value = int.MinValue;
+                        }
+                        var offset = 3 * t;
+                        p[offset] = (byte)(value >> 8);
+                        p[offset + 1] = (byte)(value >> 16);
+                        p[offset + 2] = (byte)(value >> 24);
+                    }
+                }
+            }
+
+            private static void Clear_Int24LSB(IntPtr ptr, int length)
+            {
+                unsafe
+                {
+                    var p = (byte*)ptr;
+                    for (var t = 0; t < length; t++)
+                    {
+                        var offset = 3 * t;
+                        p[offset] = 0;
+                        p[offset + 1] = 0;
+                        p[offset + 2] = 0;
                     }
                 }
             }
