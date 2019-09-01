@@ -21,6 +21,19 @@ namespace Orcbolg.Recog
             return sum / count;
         }
 
+        public static Vector<double> WeightedMean(this IReadOnlyList<Vector<double>> xs, IReadOnlyList<double> weights)
+        {
+            Vector<double> sum = new DenseVector(xs[0].Count);
+            var weightSum = 0.0;
+            for (var i = 0; i < xs.Count; i++)
+            {
+                var w = weights[i];
+                sum += w * xs[i];
+                weightSum += w;
+            }
+            return sum / weightSum;
+        }
+
         public static Vector<double> Variance(this IReadOnlyList<Vector<double>> xs)
         {
             var mean = Mean(xs);
@@ -40,6 +53,28 @@ namespace Orcbolg.Recog
             return sum / (count - 1);
         }
 
+        public static Vector<double> WeightedVariance(this IReadOnlyList<Vector<double>> xs, IReadOnlyList<double> weights)
+        {
+            var mean = WeightedMean(xs, weights);
+            return WeightedVariance(xs, weights, mean);
+        }
+
+        public static Vector<double> WeightedVariance(IReadOnlyList<Vector<double>> xs, IReadOnlyList<double> weights, Vector<double> mean)
+        {
+            Vector<double> sum = new DenseVector(xs[0].Count);
+            var weightSum = 0.0;
+            var squareSum = 0.0;
+            for (var i = 0; i < xs.Count; i++)
+            {
+                var w = weights[i];
+                var d = xs[i] - mean;
+                sum += w * d.PointwiseMultiply(d);
+                weightSum += w;
+                squareSum += w * w;
+            }
+            return sum / (weightSum - (squareSum / weightSum));
+        }
+
         public static Matrix<double> Covariance(this IReadOnlyList<Vector<double>> xs)
         {
             var mean = Mean(xs);
@@ -57,6 +92,28 @@ namespace Orcbolg.Recog
                 count++;
             }
             return sum / (count - 1);
+        }
+
+        public static Matrix<double> WeightedCovariance(this IReadOnlyList<Vector<double>> xs, IReadOnlyList<double> weights)
+        {
+            var mean = WeightedMean(xs, weights);
+            return WeightedCovariance(xs, weights, mean);
+        }
+
+        public static Matrix<double> WeightedCovariance(IReadOnlyList<Vector<double>> xs, IReadOnlyList<double> weights, Vector<double> mean)
+        {
+            Matrix<double> sum = new DenseMatrix(xs[0].Count);
+            var weightSum = 0.0;
+            var squareSum = 0.0;
+            for (var i = 0; i < xs.Count; i++)
+            {
+                var w = weights[i];
+                var d = xs[i] - mean;
+                sum += w * d.OuterProduct(d);
+                weightSum += w;
+                squareSum += w * w;
+            }
+            return sum / (weightSum - (squareSum / weightSum));
         }
     }
 }
