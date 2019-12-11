@@ -13,7 +13,7 @@ namespace Orcbolg.Dsp
         public static float[][] Read(string fileName)
         {
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 var sampleOffset = 0;
                 var sampleCount = (int)(reader.Length / reader.BlockAlign);
@@ -24,7 +24,7 @@ namespace Orcbolg.Dsp
         public static float[][] Read(string fileName, out int sampleRate)
         {
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 sampleRate = reader.WaveFormat.SampleRate;
                 var sampleOffset = 0;
@@ -38,7 +38,7 @@ namespace Orcbolg.Dsp
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             if (sampleOffset < 0) throw new ArgumentOutOfRangeException("The sample offset must be greater than or equal to zero.", nameof(sampleOffset));
             if (sampleCount < 0) throw new ArgumentOutOfRangeException("The sample count must be greater than or equal to zero.", nameof(sampleCount));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 var dataLength = (int)(reader.Length / reader.BlockAlign);
                 var endPosition = sampleOffset + sampleCount;
@@ -52,7 +52,7 @@ namespace Orcbolg.Dsp
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
             if (sampleOffset < 0) throw new ArgumentOutOfRangeException("The sample offset must be greater than or equal to zero.", nameof(sampleOffset));
             if (sampleCount < 0) throw new ArgumentOutOfRangeException("The sample count must be greater than or equal to zero.", nameof(sampleCount));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 var dataLength = (int)(reader.Length / reader.BlockAlign);
                 var endPosition = sampleOffset + sampleCount;
@@ -65,7 +65,7 @@ namespace Orcbolg.Dsp
         public static float[][] Read(string fileName, TimeSpan offset, TimeSpan length)
         {
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 var sampleOffset = (int)Math.Round(reader.WaveFormat.SampleRate * offset.TotalSeconds);
                 var endPosition = (int)Math.Round(reader.WaveFormat.SampleRate * (offset.TotalSeconds + length.TotalSeconds));
@@ -81,7 +81,7 @@ namespace Orcbolg.Dsp
         public static float[][] Read(string fileName, TimeSpan offset, TimeSpan length, out int sampleRate)
         {
             if (fileName == null) throw new ArgumentNullException(nameof(fileName));
-            using (var reader = new WaveFileReader(fileName))
+            using (var reader = CreateReader(fileName))
             {
                 var sampleOffset = (int)Math.Round(reader.WaveFormat.SampleRate * offset.TotalSeconds);
                 var endPosition = (int)Math.Round(reader.WaveFormat.SampleRate * (offset.TotalSeconds + length.TotalSeconds));
@@ -124,6 +124,16 @@ namespace Orcbolg.Dsp
             }
 
             return destination;
+        }
+
+        private static WaveFileReader CreateReader(string fileName)
+        {
+            var reader = new WaveFileReader(fileName);
+            if (reader.WaveFormat.BitsPerSample != 16)
+            {
+                throw new NotSupportedException("The sample format must be Int16.");
+            }
+            return reader;
         }
 
         public static void Write(float[][] data, int sampleRate, string fileName)

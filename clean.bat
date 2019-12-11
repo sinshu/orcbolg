@@ -10,4 +10,5 @@ rmdir /s /q "Rockon\bin"
 rmdir /s /q "Rockon\obj"
 rmdir /s /q "Workspace\bin"
 rmdir /s /q "Workspace\obj"
+rmdir /s /q "TestResults"
 pause
