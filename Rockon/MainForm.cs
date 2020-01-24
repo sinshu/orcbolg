@@ -476,7 +476,15 @@ namespace Rockon
                     {
                         var filename = GetNewFileName() + ".wav";
                         var path = Path.Combine(form.setting.RecordingDirectory, filename);
-                        form.dspComponent.DspContext.StartRecording(number, path);
+                        var sampleCount = (long)Math.Round(form.setting.SampleRate * form.setting.RecordingDuration);
+                        if (sampleCount == 0)
+                        {
+                            form.dspComponent.DspContext.StartRecording(number, path);
+                        }
+                        else
+                        {
+                            form.dspComponent.DspContext.StartRecording(number, path, sampleCount);
+                        }
                         recording = true;
                         form.DebugWrite("録音開始 (No " + number + ", " + filename + ")");
                         UpdateForm();

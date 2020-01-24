@@ -24,6 +24,7 @@ namespace Rockon
         private readonly float[] inputGains;
         private readonly float[] outputGains;
         private readonly string recordingDirectory;
+        private readonly double recordingDuration;
 
         public Setting() : this(Path.Combine(defaultDirectory, defaultCfgName))
         {
@@ -44,6 +45,7 @@ namespace Rockon
             outputChannels = GetIntList(dic, "output_channels").Select(x => x - 1).ToArray();
             outputGains = GetFloatList(dic, "output_gains").ToArray();
             recordingDirectory = Path.Combine(defaultDirectory, GetString(dic, "rec_directory"));
+            recordingDuration = GetDouble(dic, "rec_duration");
 
             if (inputChannels.Length == 0)
             {
@@ -103,6 +105,28 @@ namespace Rockon
                 throw new KeyNotFoundException("設定項目 " + key + " を設定してください。(" + Path.GetFileName(cfgPath) + ")");
             }
             if (int.TryParse(info.Value, out value))
+            {
+                return value;
+            }
+            else
+            {
+                throw new FormatException("設定項目 " + key + " の値を正しく設定してください。(" + Path.GetFileName(cfgPath) + ", 行 " + info.Position + ")");
+            }
+        }
+
+        private double GetDouble(Dictionary<string, LineInfo> dic, string key)
+        {
+            double value;
+            LineInfo info;
+            try
+            {
+                info = dic[key];
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new KeyNotFoundException("設定項目 " + key + " を設定してください。(" + Path.GetFileName(cfgPath) + ")");
+            }
+            if (double.TryParse(info.Value, out value))
             {
                 return value;
             }
@@ -181,7 +205,8 @@ namespace Rockon
             sb.Append(nameof(InputGains)).Append(" = { ").Append(string.Join(", ", InputGains)).AppendLine(" },");
             sb.Append(nameof(OutputChannels)).Append(" = { ").Append(string.Join(", ", OutputChannels)).AppendLine(" },");
             sb.Append(nameof(OutputGains)).Append(" = { ").Append(string.Join(", ", OutputGains)).AppendLine(" },");
-            sb.Append(nameof(RecordingDirectory)).Append(" = ").Append(RecordingDirectory).AppendLine();
+            sb.Append(nameof(RecordingDirectory)).Append(" = ").Append(RecordingDirectory).AppendLine(",");
+            sb.Append(nameof(RecordingDuration)).Append(" = ").Append(RecordingDuration).AppendLine();
             return sb.ToString();
         }
 
@@ -270,6 +295,14 @@ namespace Rockon
             get
             {
                 return recordingDirectory;
+            }
+        }
+
+        public double RecordingDuration
+        {
+            get
+            {
+                return recordingDuration;
             }
         }
 
