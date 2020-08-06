@@ -47,7 +47,7 @@ namespace Orcbolg.Dsp
                 realtimeDsps = new List<IRealtimeDsp>();
                 nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-                reader = new WaveFileReader(inputFileName);
+                reader = CreateReader(inputFileName);
                 readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
                 writer = null;
                 writeBuffer = null;
@@ -86,7 +86,7 @@ namespace Orcbolg.Dsp
                 realtimeDsps = new List<IRealtimeDsp>();
                 nonrealtimeDsps = new List<INonrealtimeDsp>();
 
-                reader = new WaveFileReader(inputFileName);
+                reader = CreateReader(inputFileName);
                 readBuffer = new byte[reader.WaveFormat.BlockAlign * intervalLength];
                 writer = new WaveFileWriter(outputFileName, new WaveFormat(reader.WaveFormat.SampleRate, 16, outputChannelCount));
                 writeBuffer = new byte[writer.WaveFormat.BlockAlign * intervalLength];
@@ -107,6 +107,16 @@ namespace Orcbolg.Dsp
                 Dispose();
                 ExceptionDispatchInfo.Capture(e).Throw();
             }
+        }
+
+        private static WaveFileReader CreateReader(string fileName)
+        {
+            var reader = new WaveFileReader(fileName);
+            if (reader.WaveFormat.BitsPerSample != 16)
+            {
+                throw new NotSupportedException("The sample format must be Int16.");
+            }
+            return reader;
         }
 
         public void AddDsp(IRealtimeDsp dsp)
