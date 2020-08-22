@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,13 @@ namespace Orcbolg.Dsp
 
         private long processedSampleCount;
 
+        private Stopwatch timer;
+        private object mutex;
+        private double maxTime;
+        private double weight;
+        private double dspTime;
+        private double cpuLoad;
+
         public WaveRecorder(IDspDriver driver)
         {
             if (driver == null) throw new ArgumentNullException(nameof(driver));
@@ -51,6 +59,13 @@ namespace Orcbolg.Dsp
             recordingStartPosition = -1;
 
             processedSampleCount = 0;
+
+            timer = new Stopwatch();
+            mutex = new object();
+            maxTime = (double)driver.IntervalLength / driver.SampleRate;
+            weight = Math.Pow(10, -3 / ((double)driver.SampleRate / driver.IntervalLength));
+            dspTime = 0;
+            cpuLoad = 0;
         }
 
         public void Dispose()
@@ -81,7 +96,19 @@ namespace Orcbolg.Dsp
             var intervalCommand = command as IntervalCommand;
             if (intervalCommand != null)
             {
+                timer.Start();
+
                 Process(context, intervalCommand);
+
+                timer.Stop();
+                var epalsed = timer.Elapsed.TotalSeconds;
+                dspTime = weight * dspTime + (1 - weight) * epalsed;
+                var newCpuLoad = Math.Min(dspTime / maxTime, 1.0);
+                lock (mutex)
+                {
+                    cpuLoad = newCpuLoad;
+                }
+                timer.Reset();
             }
 
             var keyDownCommand = command as KeyDownCommand;
@@ -232,6 +259,17 @@ namespace Orcbolg.Dsp
             get
             {
                 return Interlocked.Read(ref processedSampleCount);
+            }
+        }
+
+        public double CpuLoad
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    return cpuLoad;
+                }
             }
         }
     }

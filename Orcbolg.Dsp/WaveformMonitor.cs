@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -51,6 +52,13 @@ namespace Orcbolg.Dsp
         private int ui_drawCycleCount;
 
         private long processedSampleCount;
+
+        private Stopwatch timer;
+        private object mutex;
+        private double maxTime;
+        private double weight;
+        private double dspTime;
+        private double cpuLoad;
 
         public WaveformMonitor(IDspDriver driver, PictureBox pictureBox, int updateInterval, int drawCycle, bool showOutput)
         {
@@ -139,6 +147,13 @@ namespace Orcbolg.Dsp
 
                 processedSampleCount = 0;
 
+                timer = new Stopwatch();
+                mutex = new object();
+                maxTime = (double)driver.IntervalLength / driver.SampleRate;
+                weight = Math.Pow(10, -3 / ((double)driver.SampleRate / driver.IntervalLength));
+                dspTime = 0;
+                cpuLoad = 0;
+
                 pictureBox.Paint += PictureBox_Paint;
             }
             catch (Exception e)
@@ -214,7 +229,19 @@ namespace Orcbolg.Dsp
             var intervalCommand = command as IntervalCommand;
             if (intervalCommand != null)
             {
+                timer.Start();
+
                 Process(context, intervalCommand);
+
+                timer.Stop();
+                var epalsed = timer.Elapsed.TotalSeconds;
+                dspTime = weight * dspTime + (1 - weight) * epalsed;
+                var newCpuLoad = Math.Min(dspTime / maxTime, 1.0);
+                lock (mutex)
+                {
+                    cpuLoad = newCpuLoad;
+                }
+                timer.Reset();
             }
 
             var recordingStartCommand = command as RecordingStartCommand;
@@ -509,6 +536,17 @@ namespace Orcbolg.Dsp
             get
             {
                 return Interlocked.Read(ref processedSampleCount);
+            }
+        }
+
+        public double CpuLoad
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    return cpuLoad;
+                }
             }
         }
     }

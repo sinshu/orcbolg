@@ -282,8 +282,8 @@ namespace Rockon
                 var sources = new Func<double>[]
                 {
                     () => dspComponent.Watchdog.DspTime / intervalTime,
-                    () => (double)(dspContext.ProcessedSampleCount - waveformMonitor.ProcessedSampleCount) / bufferLength,
-                    () => (double)(dspContext.ProcessedSampleCount - waveRecorder.ProcessedSampleCount) / bufferLength
+                    () => waveformMonitor.CpuLoad,
+                    () => waveRecorder.CpuLoad
                 };
 
                 return new LoadMeter(form, pictureBox, names, sources);
