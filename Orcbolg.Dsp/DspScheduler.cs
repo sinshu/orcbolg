@@ -17,7 +17,7 @@ namespace Orcbolg.Dsp
         private readonly DspThread[] threads;
         private readonly List<Exception> exceptions;
 
-        private DspState state;
+        private volatile DspState state;
 
         private Task realtimeDspCompletion;
         private Task nonrealtimeDspCompletion;
